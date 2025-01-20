@@ -1,0 +1,16 @@
+{
+	"extends": "@saptacode/typescript-config/base.json",
+	"compilerOptions": {
+		"removeComments": true,
+		"target": "ES2022",
+		"sourceMap": true,
+		"outDir": "./dist",
+		"baseUrl": "./",
+		"emitDecoratorMetadata": true,
+		"experimentalDecorators": true,
+		"strictNullChecks": false,
+		"noImplicitAny": false,
+		"strictBindCallApply": false
+	}
+}
+

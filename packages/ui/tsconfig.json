@@ -1,0 +1,12 @@
+{
+  "extends": "@saptacode/typescript-config/react-library.json",
+  "compilerOptions": {
+    "baseUrl": ".",
+    "paths": {
+      "@saptacode/ui/*": ["./src/*"]
+    },
+    "forceConsistentCasingInFileNames": true
+  },
+  "include": ["src"],
+  "exclude": ["node_modules"]
+}

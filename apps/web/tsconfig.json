@@ -1,0 +1,24 @@
+{
+  "extends": "@saptacode/typescript-config/nextjs.json",
+  "compilerOptions": {
+    "plugins": [
+      {
+        "name": "next"
+      }
+    ],
+    "paths": {
+      "~/*": ["./*"]
+    }
+  },
+  "forceConsistentCasingInFileNames": true,
+  "include": [
+    "next-env.d.ts",
+    "next.config.mjs",
+    "postcss.config.mjs",
+    "**/*.ts",
+    "**/*.tsx",
+    ".next/types/**/*.ts"
+  ],
+  "exclude": ["node_modules"]
+}
+
