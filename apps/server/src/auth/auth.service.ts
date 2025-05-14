@@ -13,7 +13,7 @@ export class AuthService {
     private prisma: PrismaService,
     private jwt: JwtService,
     private config: ConfigService
-  ) {}
+  ) { }
 
   async signup(dto: RegisterDto) {
     //genereate password
@@ -22,7 +22,7 @@ export class AuthService {
       const user = await this.prisma.users.create({
         data: {
           email: dto.email,
-          username: dto.userName,
+          userName: dto.userName,
           hash,
         },
       })
@@ -30,7 +30,7 @@ export class AuthService {
         user.id,
         user.email,
         user.role,
-        user.username
+        user.userName
       )
       await this.updateRefreshTokenHash(user.id, tokens.refreshToken)
       return tokens
@@ -48,7 +48,7 @@ export class AuthService {
     // find the user by email
     const user = await this.prisma.users.findUnique({
       where: {
-        username: dto.userName,
+        userName: dto.userName,
       },
     })
 
@@ -70,7 +70,7 @@ export class AuthService {
       user.id,
       user.email,
       user.role,
-      user.username
+      user.userName
     )
     await this.updateRefreshTokenHash(user.id, tokens.refreshToken)
     return tokens
@@ -119,7 +119,7 @@ export class AuthService {
       user.id,
       user.email,
       user.role,
-      user.username
+      user.userName
     )
     await this.updateRefreshTokenHash(user.id, tokens.refreshToken)
     return tokens
@@ -133,11 +133,11 @@ export class AuthService {
     userId: number,
     email: string,
     role: string,
-    username: string
+    userName: string
   ): Promise<Tokens> {
     const payload = {
       sub: userId,
-      username,
+      userName,
       email,
       role,
     }
