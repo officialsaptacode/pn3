@@ -1,5 +1,5 @@
 {
-	"extends": "@saptacode/typescript-config/base.json",
+	"extends": "@workspace/typescript-config/base.json",
 	"compilerOptions": {
 		"removeComments": true,
 		"target": "ES2022",

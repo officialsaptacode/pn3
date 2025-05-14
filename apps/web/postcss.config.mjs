@@ -1,2 +1,1 @@
-export { default } from '@saptacode/ui/postcss.config'
-
+export { default } from "@workspace/ui/postcss.config";

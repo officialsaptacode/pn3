@@ -1,7 +1,7 @@
 import type { NextConfig } from 'next'
 
 const nextConfig: NextConfig = {
-  transpilePackages: ['@saptacode/ui'],
+  transpilePackages: ['@workspace/ui'],
 }
 
 export default nextConfig
