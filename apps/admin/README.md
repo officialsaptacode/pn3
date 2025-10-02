@@ -6,7 +6,7 @@ To run this application:
 
 ```bash
 pnpm install
-pnpm start  
+pnpm start
 ```
 
 # Building For Production
@@ -28,6 +28,35 @@ pnpm test
 ## Styling
 
 This project uses [Tailwind CSS](https://tailwindcss.com/) for styling.
+
+
+## Linting & Formatting
+
+
+This project uses [eslint](https://eslint.org/) and [prettier](https://prettier.io/) for linting and formatting. Eslint is configured using [tanstack/eslint-config](https://tanstack.com/config/latest/docs/eslint). The following scripts are available:
+
+```bash
+pnpm lint
+pnpm format
+pnpm check
+```
+
+
+## T3Env
+
+- You can use T3Env to add type safety to your environment variables.
+- Add Environment variables to the `src/env.mjs` file.
+- Use the environment variables in your code.
+
+### Usage
+
+```ts
+import { env } from "@/env";
+
+console.log(env.VITE_APP_TITLE);
+```
+
+
 
 
 
