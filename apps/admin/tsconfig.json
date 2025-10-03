@@ -1,5 +1,5 @@
 {
-  "include": ["**/*.ts", "**/*.tsx", "eslint.config.js", "prettier.config.js", "vite.config.js"],
+  "extends": "@workspace/typescript-config/base.json",
   
   "compilerOptions": {
     "target": "ES2022",
@@ -8,22 +8,24 @@
     "lib": ["ES2022", "DOM", "DOM.Iterable"],
     "types": ["vite/client"],
 
-    /* Bundler mode */
-    "moduleResolution": "bundler",
-    "allowImportingTsExtensions": true,
-    "verbatimModuleSyntax": false,
-    "noEmit": true,
 
-    /* Linting */
-    "skipLibCheck": true,
-    "strict": true,
-    "noUnusedLocals": true,
-    "noUnusedParameters": true,
-    "noFallthroughCasesInSwitch": true,
-    "noUncheckedSideEffectImports": true,
-    "baseUrl": ".",
-    "paths": {
-      "@/*": ["./src/*"],
-    }
+  "forceConsistentCasingInFileNames": true,
+  /* Bundler mode */
+  "moduleResolution": "bundler",
+  "allowImportingTsExtensions": true,
+  "verbatimModuleSyntax": false,
+  "noEmit": true,
+  
+  /* Linting */
+  "skipLibCheck": true,
+  "strict": true,
+  "noUnusedLocals": true,
+  "noUnusedParameters": true,
+  "noFallthroughCasesInSwitch": true,
+  "noUncheckedSideEffectImports": true,
+  "baseUrl": ".",
+  "paths": {
+    "@/*": ["./src/*"],
   }
+}
 }
