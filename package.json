@@ -7,6 +7,7 @@
     "build": "turbo build",
     "dev": "turbo dev",
     "lint": "turbo lint",
+    "test": "turbo test",
     "format": "prettier --write \"**/*.{ts,tsx,md}\"",
     "ui": "pnpm --filter @workspace/ui ui add",
     "devClient": "pnpm -F web dev",

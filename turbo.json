@@ -20,6 +20,10 @@
       "dependsOn": ["^build"],
       "outputs": ["dist/**"]
     },
+    "test": {
+      "dependsOn": ["^test"],
+      "outputs": ["dist/**"]
+    },
     "lint": {},
     "dev": {
       "cache": false,
