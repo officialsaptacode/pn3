@@ -1,1 +1,1 @@
-export * from './auth.entities'
+export * from "./auth.entities";

@@ -4,14 +4,16 @@ import {
   HttpCode,
   HttpStatus,
   Post,
+  Res,
   UseGuards,
 } from '@nestjs/common'
-import { AuthService } from './auth.service'
-import { AuthDto, RegisterDto } from './dto'
+import type { Response } from 'express'
+import type { AuthService } from './auth.service'
 import { GetCurrentUser, GetCurrentUserId, Public } from './decorator'
+import type { AuthDto, RegisterDto } from './dto'
+import type { AuthEntities } from './entities'
 import { RtGuard } from './guard'
-import { Tokens } from './types'
-import { AuthEntities } from './entities'
+import type { Tokens } from './types'
 
 @Controller('api/auth')
 export class AuthController {
@@ -20,15 +22,37 @@ export class AuthController {
   @Public()
   @Post('signup')
   @HttpCode(HttpStatus.CREATED)
-  signup(@Body() dto: RegisterDto): Promise<AuthEntities> {
-    return this.authService.signup(dto)
+  async signup(@Body() dto: RegisterDto, @Res({ passthrough: true }) res: Response): Promise<AuthEntities> {
+    const tokens = await this.authService.signup(dto)
+    res.cookie('access_token', tokens.accessToken, {
+      httpOnly: true,
+      sameSite: 'lax',
+      secure: false,
+    })
+    res.cookie('refresh_token', tokens.refreshToken, {
+      httpOnly: true,
+      sameSite: 'lax',
+      secure: false,
+    })
+    return tokens
   }
 
   @Public()
   @Post('signin')
   @HttpCode(HttpStatus.OK)
-  signin(@Body() dto: AuthDto): Promise<AuthEntities> {
-    return this.authService.signin(dto)
+  async signin(@Body() dto: AuthDto, @Res({ passthrough: true }) res: Response): Promise<AuthEntities> {
+    const tokens = await this.authService.signin(dto)
+    res.cookie('access_token', tokens.accessToken, {
+      httpOnly: true,
+      sameSite: 'lax',
+      secure: false, // set to true in production
+    })
+    res.cookie('refresh_token', tokens.refreshToken, {
+      httpOnly: true,
+      sameSite: 'lax',
+      secure: false, // set to true in production
+    })
+    return tokens
   }
 
   @Post('logout')
@@ -43,8 +67,20 @@ export class AuthController {
   @HttpCode(HttpStatus.OK)
   async refreshToken(
     @GetCurrentUserId() userId: number,
-    @GetCurrentUser('refreshToken') refreshToken: string
+    @GetCurrentUser('refreshToken') refreshToken: string,
+    @Res({ passthrough: true }) res: Response
   ): Promise<Tokens> {
-    return this.authService.refreshToken(userId, refreshToken)
+    const tokens = await this.authService.refreshToken(userId, refreshToken)
+    res.cookie('access_token', tokens.accessToken, {
+      httpOnly: true,
+      sameSite: 'lax',
+      secure: false,
+    })
+    res.cookie('refresh_token', tokens.refreshToken, {
+      httpOnly: true,
+      sameSite: 'lax',
+      secure: false,
+    })
+    return tokens
   }
 }

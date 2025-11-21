@@ -25,6 +25,7 @@
     "prepare": "husky"
   },
   "devDependencies": {
+    "@biomejs/biome": "^2.3.7",
     "@workspace/eslint-config": "workspace:*",
     "@workspace/typescript-config": "workspace:*",
     "husky": "^9.1.7",

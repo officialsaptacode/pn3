@@ -1,6 +1,5 @@
-
 export class AuthEntities {
-	accessToken: string
-	refreshToken: string
-	role: string
+	accessToken: string;
+	refreshToken: string;
+	role: string;
 }

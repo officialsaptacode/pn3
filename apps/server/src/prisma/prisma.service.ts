@@ -1,6 +1,10 @@
-import { Injectable, OnModuleDestroy, OnModuleInit } from '@nestjs/common'
-import { ConfigService } from '@nestjs/config'
-import { PrismaClient } from '@prisma/client'
+import {
+	Injectable,
+	type OnModuleDestroy,
+	type OnModuleInit,
+} from "@nestjs/common";
+import type { ConfigService } from "@nestjs/config";
+import { PrismaClient } from "@prisma/client";
 @Injectable()
 export class PrismaService
 	extends PrismaClient
@@ -9,17 +13,17 @@ export class PrismaService
 		super({
 			datasources: {
 				db: {
-					url: config.get('DATABASE_URL'),
+					url: config.get("DATABASE_URL"),
 				},
 			},
-		})
+		});
 	}
 	async onModuleInit() {
-		await this.$connect()
+		await this.$connect();
 	}
 
 	async onModuleDestroy() {
-		await this.$disconnect()
+		await this.$disconnect();
 	}
 
 	async cleanDb() {
@@ -27,6 +31,10 @@ export class PrismaService
 			this.users.deleteMany({}),
 			// this.post.deleteMany({}),
 			// this.comment.deleteMany({}),
-		])
+		]);
+	}
+
+	async cleanDatabase() {
+		return this.cleanDb();
 	}
 }
