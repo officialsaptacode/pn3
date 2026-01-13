@@ -1,10 +1,10 @@
-import { join } from "node:path";
 import { ValidationPipe } from "@nestjs/common";
 import { NestFactory } from "@nestjs/core";
 import type { NestExpressApplication } from "@nestjs/platform-express";
 import { DocumentBuilder, SwaggerModule } from "@nestjs/swagger";
 import cookieParser from "cookie-parser";
 import helmet from "helmet";
+import { join } from "node:path";
 import { AppModule } from "./app.module";
 
 async function bootstrap() {
@@ -25,10 +25,10 @@ async function bootstrap() {
 	});
 
 	const config = new DocumentBuilder()
-		.setTitle("PN3")
-		.setDescription("The PN3 description")
+		.setTitle("SAAS API")
+		.setDescription("The SAAS API description")
 		.setVersion("1.0")
-		.addTag("PN3")
+		.addTag("SAAS API")
 		.addBearerAuth()
 		.build();
 	const document = SwaggerModule.createDocument(app, config);
