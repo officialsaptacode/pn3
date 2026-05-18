@@ -1,5 +1,7 @@
 packages:
+  # Main server and Admin Panels
   - apps/*
+  # Shared UI components and utilities
   - packages/*
 
 onlyBuiltDependencies:
@@ -17,4 +19,4 @@ onlyBuiltDependencies:
   - unrs-resolver
 
 overrides:
-  tmp@<=0.2.3: '>=0.2.4'
+  vite: 'npm:rolldown-vite@7.1.20'

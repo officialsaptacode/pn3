@@ -1,31 +1,16 @@
 {
-  "extends": "@workspace/typescript-config/base.json",
-  
+  "extends": "../../packages/typescript-config/react-library.json",
   "compilerOptions": {
-    "target": "ES2022",
-    "jsx": "react-jsx",
-    "module": "ESNext",
-    "lib": ["ES2022", "DOM", "DOM.Iterable"],
-    "types": ["vite/client"],
-
-
-  "forceConsistentCasingInFileNames": true,
-  /* Bundler mode */
-  "moduleResolution": "bundler",
-  "allowImportingTsExtensions": true,
-  "verbatimModuleSyntax": false,
-  "noEmit": true,
-  
-  /* Linting */
-  "skipLibCheck": true,
-  "strict": true,
-  "noUnusedLocals": true,
-  "noUnusedParameters": true,
-  "noFallthroughCasesInSwitch": true,
-  "noUncheckedSideEffectImports": true,
-  "baseUrl": ".",
-  "paths": {
-    "@/*": ["./src/*"],
-  }
-}
+    "skipLibCheck": true,
+    "moduleResolution": "bundler",
+    "baseUrl": ".",
+    "paths": {
+      "@/*": ["src/*"], // local admin source
+      "@workspace/ui/lib/*": ["../../packages/ui/src/lib/*"],
+      "@workspace/ui/css": ["../../packages/ui/src/styles/globals.css"],
+      "@workspace/ui/*": ["../../packages/ui/src/components/*", "../../packages/ui/src/*"]
+    },
+    "outDir": "dist"
+  },
+  "include": ["src", "../../packages/ui/src"]
 }

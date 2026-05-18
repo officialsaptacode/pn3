@@ -7,8 +7,12 @@
       }
     ],
     "paths": {
-      "~/*": ["./*"]
-    }
+      "~/*": ["./*"],
+      "@/*": ["./src/*"],
+      "@workspace/api-client": ["../../packages/api-client/src/index.ts"],
+      "@workspace/ui/*": ["../../packages/ui/src/*"]
+    },
+    "moduleResolution": "bundler"
   },
   "forceConsistentCasingInFileNames": true,
   "include": [
@@ -17,8 +21,8 @@
     "postcss.config.mjs",
     "**/*.ts",
     "**/*.tsx",
-    ".next/types/**/*.ts"
+    ".next/types/**/*.ts",
+    "../../packages/ui/src/components/TiptapRenderer.tsx"
   ],
   "exclude": ["node_modules"]
 }
-

@@ -472,3 +472,30 @@
   box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
   transform: translateY(-1px);
 }
+
+/* Custom Swiper Pagination */
+.custom-pagination .swiper-pagination-bullet {
+  width: 10px;
+  height: 10px;
+  background-color: #d1d5db; /* Tailwind gray-300 for inactive */
+  opacity: 1; /* ensure full visibility */
+  margin: 0 4px;
+  border-radius: 9999px; /* rounded full */
+  transition: background-color 0.3s;
+}
+
+.custom-pagination .swiper-pagination-bullet-active {
+  background-color: #f97316; /* Tailwind orange-500 */
+}
+
+/* Hide default calendar icon in WebKit browsers */
+.hide-calendar::-webkit-calendar-picker-indicator {
+  display: none;
+  -webkit-appearance: none;
+  appearance: none;
+}
+
+/* Firefox */
+.hide-calendar::-moz-calendar-picker-indicator {
+  display: none;
+}

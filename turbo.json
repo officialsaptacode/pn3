@@ -6,28 +6,22 @@
   "tasks": {
     "build": {
       "dependsOn": ["^build"],
-      "outputs": ["dist/**", ".next/**", "!.next/cache/**"]
+      "outputs": ["dist/**", "build/**", ".next/**", ".output/**"]
     },
-    "server#build": {
-      "dependsOn": ["^build"],
-      "outputs": ["dist/**"]
+    "check": {
+      "outputs": []
     },
-    "web#build": {
-      "dependsOn": ["^build"],
-      "outputs": [".next/**", "!.next/cache/**"]
+    "typecheck": {
+      "dependsOn": ["^typecheck"],
+      "outputs": []
     },
-    "admin#build": {
-      "dependsOn": ["^build"],
-      "outputs": ["dist/**"]
-    },
-    "test": {
-      "dependsOn": ["^test"],
-      "outputs": ["dist/**"]
-    },
-    "lint": {},
     "dev": {
       "cache": false,
       "persistent": true
+    },
+    "test": {
+      "dependsOn": ["build"],
+      "outputs": ["coverage/**"]
     }
   }
 }

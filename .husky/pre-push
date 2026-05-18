@@ -1,0 +1,12 @@
+# #!/usr/bin/env sh
+
+# echo "🚀 Running pre-push checks..."
+
+# # Run full build
+# echo "🏗️ Running build..."
+# pnpm build || {
+#   echo "❌ Build failed. Please fix the errors and try again."
+#   exit 1
+# }
+
+# echo "✅ All pre-push checks passed! Pushing to remote..."

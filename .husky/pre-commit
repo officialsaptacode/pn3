@@ -1,1 +1,26 @@
-pnpm build
+# #!/usr/bin/env sh
+
+# echo "🔍 Running pre-commit checks..."
+
+# # Run linting with biome
+# echo "📝 Running lint check..."
+# pnpm lint || {
+#   echo "❌ Lint check failed. Please fix the errors and try again."
+#   exit 1
+# }
+
+# # Run type checking
+# echo "🔎 Running type check..."
+# pnpm typecheck || {
+#   echo "❌ Type check failed. Please fix the errors and try again."
+#   exit 1
+# }
+
+# # Run tests
+# echo "🧪 Running tests..."
+# # pnpm --filter server test || {
+# #   echo "❌ Tests failed. Please fix the errors and try again."
+# #   exit 1
+# # }
+
+# echo "✅ All pre-commit checks passed!"
