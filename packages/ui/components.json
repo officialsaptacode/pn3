@@ -16,5 +16,9 @@
     "hooks": "@workspace/ui/hooks",
     "lib": "@workspace/ui/lib",
     "ui": "@workspace/ui/components"
+  },
+  "registries": {
+    "@blocks": "https://blocks.so/r/{name}.json",
+    "@better-upload": "https://better-upload.com/r/{name}.json"
   }
 }

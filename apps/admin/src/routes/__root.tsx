@@ -1,69 +1,88 @@
-import { TanStackDevtools } from "@tanstack/react-devtools";
 import type { QueryClient } from "@tanstack/react-query";
-import {
-	createRootRouteWithContext,
-	HeadContent,
-	Scripts,
-} from "@tanstack/react-router";
-import { TanStackRouterDevtoolsPanel } from "@tanstack/react-router-devtools";
-import Header from "../components/Header";
-import TanStackQueryDevtools from "../integrations/tanstack-query/devtools";
-import StoreDevtools from "../lib/demo-store-devtools";
-import appCss from "../styles.css?url";
+import { createRootRouteWithContext, Outlet } from "@tanstack/react-router";
+import React, { Suspense, useEffect } from "react";
 
-interface MyRouterContext {
-	queryClient: QueryClient;
+const TanStackRouterDevtools =
+  process.env.NODE_ENV === "production"
+    ? () => null // Render nothing in production
+    : React.lazy(() =>
+        // Lazy load in development
+        import("@tanstack/react-router-devtools").then((res) => ({
+          default: res.TanStackRouterDevtools,
+        })),
+      );
+
+import { authApi } from "@/features/auth/api/auth";
+import { useAuthStore } from "@/features/auth/stores/auth-store";
+
+export interface MyRouterContext {
+  queryClient: QueryClient;
 }
 
 export const Route = createRootRouteWithContext<MyRouterContext>()({
-	head: () => ({
-		meta: [
-			{
-				charSet: "utf-8",
-			},
-			{
-				name: "viewport",
-				content: "width=device-width, initial-scale=1",
-			},
-			{
-				title: "TanStack Start Starter",
-			},
-		],
-		links: [
-			{
-				rel: "stylesheet",
-				href: appCss,
-			},
-		],
-	}),
-
-	shellComponent: RootDocument,
+  component: RootComponent,
+  errorComponent: (props) => {
+    return (
+      <div className="flex flex-col items-center justify-center p-8 bg-background min-h-[50vh]">
+        <div className="rounded-xl border bg-card text-card-foreground shadow-sm p-8 w-full max-w-2xl">
+          <h2 className="text-2xl font-bold tracking-tight text-destructive mb-2">
+            Application Error
+          </h2>
+          <p className="text-muted-foreground mb-6">
+            An unexpected error occurred while rendering this route.
+          </p>
+          <div className="bg-muted/50 border rounded-md p-4 mb-6 overflow-auto max-h-[400px]">
+            <pre className="text-sm text-foreground/80 font-mono whitespace-pre-wrap">
+              {props.error?.message || String(props.error) || "Unknown error"}
+            </pre>
+          </div>
+          <button
+            onClick={() => window.location.reload()}
+            className="inline-flex items-center justify-center rounded-md text-sm font-medium transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring disabled:pointer-events-none disabled:opacity-50 bg-primary text-primary-foreground hover:bg-primary/90 h-10 px-4 py-2"
+          >
+            Refresh Page
+          </button>
+        </div>
+      </div>
+    );
+  },
 });
 
-function RootDocument({ children }: { children: React.ReactNode }) {
-	return (
-		<html lang="en">
-			<head>
-				<HeadContent />
-			</head>
-			<body>
-				<Header />
-				{children}
-				<TanStackDevtools
-					config={{
-						position: "bottom-left",
-					}}
-					plugins={[
-						{
-							name: "Tanstack Router",
-							render: <TanStackRouterDevtoolsPanel />,
-						},
-						TanStackQueryDevtools,
-						StoreDevtools,
-					]}
-				/>
-				<Scripts />
-			</body>
-		</html>
-	);
+function RootComponent() {
+  const setAuth = useAuthStore((state) => state.setAuth);
+  const isAuthenticated = useAuthStore((state) => state.isAuthenticated);
+
+  // Attempt to restore session on mount (e.g. refresh token)
+  useEffect(() => {
+    const initAuth = async () => {
+      if (!isAuthenticated) {
+        try {
+          const data = await authApi.refreshToken();
+          if (data?.accessToken) {
+            setAuth(
+              {
+                id: 0, // Placeholder
+                userName: "User", // Placeholder
+                email: "",
+                role: data.role,
+              },
+              data.accessToken,
+            );
+          }
+        } catch (_e) {
+          // check failed, user stays logged out
+        }
+      }
+    };
+    initAuth();
+  }, [setAuth, isAuthenticated]);
+
+  return (
+    <>
+      <Outlet />
+      <Suspense fallback={null}>
+        <TanStackRouterDevtools />
+      </Suspense>
+    </>
+  );
 }

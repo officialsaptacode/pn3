@@ -4,4 +4,11 @@ dist
 .env
 .env.local
 .turbo
-client
+apps/server/prisma/db
+uploads
+generated
+
+# Playwright
+playwright-report/
+test-results/
+.playwright-mcp/

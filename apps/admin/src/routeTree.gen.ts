@@ -9,19 +9,47 @@
 // Additionally, you should also exclude this file from your linter and/or formatter to prevent it from being checked or modified.
 
 import { Route as rootRouteImport } from './routes/__root'
-import { Route as UsersRouteImport } from './routes/users'
+import { Route as LoginRouteImport } from './routes/login'
+import { Route as AuthRouteImport } from './routes/_auth'
 import { Route as IndexRouteImport } from './routes/index'
-import { Route as DemoTanstackQueryRouteImport } from './routes/demo.tanstack-query'
-import { Route as DemoTableRouteImport } from './routes/demo.table'
-import { Route as DemoStoreRouteImport } from './routes/demo.store'
-import { Route as ApiDemoTqTodosRouteImport } from './routes/api.demo-tq-todos'
-import { Route as ApiDemoNamesRouteImport } from './routes/api.demo-names'
-import { Route as DemoStartServerFuncsRouteImport } from './routes/demo.start.server-funcs'
-import { Route as DemoStartApiRequestRouteImport } from './routes/demo.start.api-request'
+import { Route as AuthProfileRouteImport } from './routes/_auth/profile'
+import { Route as AuthUsersIndexRouteImport } from './routes/_auth/users/index'
+import { Route as AuthTripsIndexRouteImport } from './routes/_auth/trips/index'
+import { Route as AuthTagsIndexRouteImport } from './routes/_auth/tags/index'
+import { Route as AuthReviewsIndexRouteImport } from './routes/_auth/reviews/index'
+import { Route as AuthNewsletterIndexRouteImport } from './routes/_auth/newsletter/index'
+import { Route as AuthMediaIndexRouteImport } from './routes/_auth/media/index'
+import { Route as AuthInquiriesIndexRouteImport } from './routes/_auth/inquiries/index'
+import { Route as AuthDestinationsIndexRouteImport } from './routes/_auth/destinations/index'
+import { Route as AuthDeparturesIndexRouteImport } from './routes/_auth/departures/index'
+import { Route as AuthDashboardIndexRouteImport } from './routes/_auth/dashboard/index'
+import { Route as AuthBookingsIndexRouteImport } from './routes/_auth/bookings/index'
+import { Route as AuthBlogsIndexRouteImport } from './routes/_auth/blogs/index'
+import { Route as AuthAuthorsIndexRouteImport } from './routes/_auth/authors/index'
+import { Route as AuthTripsCreateRouteImport } from './routes/_auth/trips/create'
+import { Route as AuthTagsCreateRouteImport } from './routes/_auth/tags/create'
+import { Route as AuthSettingsNavbarRouteImport } from './routes/_auth/settings/navbar'
+import { Route as AuthSettingsLandingPageRouteImport } from './routes/_auth/settings/landing-page'
+import { Route as AuthInquiriesIdRouteImport } from './routes/_auth/inquiries/$id'
+import { Route as AuthDestinationsCreateRouteImport } from './routes/_auth/destinations/create'
+import { Route as AuthDeparturesCreateRouteImport } from './routes/_auth/departures/create'
+import { Route as AuthBookingsIdRouteImport } from './routes/_auth/bookings/$id'
+import { Route as AuthBlogsCreateRouteImport } from './routes/_auth/blogs/create'
+import { Route as AuthAuthorsCreateRouteImport } from './routes/_auth/authors/create'
+import { Route as AuthTripsEditIdRouteImport } from './routes/_auth/trips/edit/$id'
+import { Route as AuthTagsEditIdRouteImport } from './routes/_auth/tags/edit/$id'
+import { Route as AuthDestinationsEditIdRouteImport } from './routes/_auth/destinations/edit/$id'
+import { Route as AuthDeparturesEditIdRouteImport } from './routes/_auth/departures/edit/$id'
+import { Route as AuthBlogsEditIdRouteImport } from './routes/_auth/blogs/edit/$id'
+import { Route as AuthAuthorsEditIdRouteImport } from './routes/_auth/authors/edit/$id'
 
-const UsersRoute = UsersRouteImport.update({
-  id: '/users',
-  path: '/users',
+const LoginRoute = LoginRouteImport.update({
+  id: '/login',
+  path: '/login',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const AuthRoute = AuthRouteImport.update({
+  id: '/_auth',
   getParentRoute: () => rootRouteImport,
 } as any)
 const IndexRoute = IndexRouteImport.update({
@@ -29,131 +57,387 @@ const IndexRoute = IndexRouteImport.update({
   path: '/',
   getParentRoute: () => rootRouteImport,
 } as any)
-const DemoTanstackQueryRoute = DemoTanstackQueryRouteImport.update({
-  id: '/demo/tanstack-query',
-  path: '/demo/tanstack-query',
-  getParentRoute: () => rootRouteImport,
+const AuthProfileRoute = AuthProfileRouteImport.update({
+  id: '/profile',
+  path: '/profile',
+  getParentRoute: () => AuthRoute,
 } as any)
-const DemoTableRoute = DemoTableRouteImport.update({
-  id: '/demo/table',
-  path: '/demo/table',
-  getParentRoute: () => rootRouteImport,
+const AuthUsersIndexRoute = AuthUsersIndexRouteImport.update({
+  id: '/users/',
+  path: '/users/',
+  getParentRoute: () => AuthRoute,
 } as any)
-const DemoStoreRoute = DemoStoreRouteImport.update({
-  id: '/demo/store',
-  path: '/demo/store',
-  getParentRoute: () => rootRouteImport,
+const AuthTripsIndexRoute = AuthTripsIndexRouteImport.update({
+  id: '/trips/',
+  path: '/trips/',
+  getParentRoute: () => AuthRoute,
 } as any)
-const ApiDemoTqTodosRoute = ApiDemoTqTodosRouteImport.update({
-  id: '/api/demo-tq-todos',
-  path: '/api/demo-tq-todos',
-  getParentRoute: () => rootRouteImport,
+const AuthTagsIndexRoute = AuthTagsIndexRouteImport.update({
+  id: '/tags/',
+  path: '/tags/',
+  getParentRoute: () => AuthRoute,
 } as any)
-const ApiDemoNamesRoute = ApiDemoNamesRouteImport.update({
-  id: '/api/demo-names',
-  path: '/api/demo-names',
-  getParentRoute: () => rootRouteImport,
+const AuthReviewsIndexRoute = AuthReviewsIndexRouteImport.update({
+  id: '/reviews/',
+  path: '/reviews/',
+  getParentRoute: () => AuthRoute,
 } as any)
-const DemoStartServerFuncsRoute = DemoStartServerFuncsRouteImport.update({
-  id: '/demo/start/server-funcs',
-  path: '/demo/start/server-funcs',
-  getParentRoute: () => rootRouteImport,
+const AuthNewsletterIndexRoute = AuthNewsletterIndexRouteImport.update({
+  id: '/newsletter/',
+  path: '/newsletter/',
+  getParentRoute: () => AuthRoute,
 } as any)
-const DemoStartApiRequestRoute = DemoStartApiRequestRouteImport.update({
-  id: '/demo/start/api-request',
-  path: '/demo/start/api-request',
-  getParentRoute: () => rootRouteImport,
+const AuthMediaIndexRoute = AuthMediaIndexRouteImport.update({
+  id: '/media/',
+  path: '/media/',
+  getParentRoute: () => AuthRoute,
+} as any)
+const AuthInquiriesIndexRoute = AuthInquiriesIndexRouteImport.update({
+  id: '/inquiries/',
+  path: '/inquiries/',
+  getParentRoute: () => AuthRoute,
+} as any)
+const AuthDestinationsIndexRoute = AuthDestinationsIndexRouteImport.update({
+  id: '/destinations/',
+  path: '/destinations/',
+  getParentRoute: () => AuthRoute,
+} as any)
+const AuthDeparturesIndexRoute = AuthDeparturesIndexRouteImport.update({
+  id: '/departures/',
+  path: '/departures/',
+  getParentRoute: () => AuthRoute,
+} as any)
+const AuthDashboardIndexRoute = AuthDashboardIndexRouteImport.update({
+  id: '/dashboard/',
+  path: '/dashboard/',
+  getParentRoute: () => AuthRoute,
+} as any)
+const AuthBookingsIndexRoute = AuthBookingsIndexRouteImport.update({
+  id: '/bookings/',
+  path: '/bookings/',
+  getParentRoute: () => AuthRoute,
+} as any)
+const AuthBlogsIndexRoute = AuthBlogsIndexRouteImport.update({
+  id: '/blogs/',
+  path: '/blogs/',
+  getParentRoute: () => AuthRoute,
+} as any)
+const AuthAuthorsIndexRoute = AuthAuthorsIndexRouteImport.update({
+  id: '/authors/',
+  path: '/authors/',
+  getParentRoute: () => AuthRoute,
+} as any)
+const AuthTripsCreateRoute = AuthTripsCreateRouteImport.update({
+  id: '/trips/create',
+  path: '/trips/create',
+  getParentRoute: () => AuthRoute,
+} as any)
+const AuthTagsCreateRoute = AuthTagsCreateRouteImport.update({
+  id: '/tags/create',
+  path: '/tags/create',
+  getParentRoute: () => AuthRoute,
+} as any)
+const AuthSettingsNavbarRoute = AuthSettingsNavbarRouteImport.update({
+  id: '/settings/navbar',
+  path: '/settings/navbar',
+  getParentRoute: () => AuthRoute,
+} as any)
+const AuthSettingsLandingPageRoute = AuthSettingsLandingPageRouteImport.update({
+  id: '/settings/landing-page',
+  path: '/settings/landing-page',
+  getParentRoute: () => AuthRoute,
+} as any)
+const AuthInquiriesIdRoute = AuthInquiriesIdRouteImport.update({
+  id: '/inquiries/$id',
+  path: '/inquiries/$id',
+  getParentRoute: () => AuthRoute,
+} as any)
+const AuthDestinationsCreateRoute = AuthDestinationsCreateRouteImport.update({
+  id: '/destinations/create',
+  path: '/destinations/create',
+  getParentRoute: () => AuthRoute,
+} as any)
+const AuthDeparturesCreateRoute = AuthDeparturesCreateRouteImport.update({
+  id: '/departures/create',
+  path: '/departures/create',
+  getParentRoute: () => AuthRoute,
+} as any)
+const AuthBookingsIdRoute = AuthBookingsIdRouteImport.update({
+  id: '/bookings/$id',
+  path: '/bookings/$id',
+  getParentRoute: () => AuthRoute,
+} as any)
+const AuthBlogsCreateRoute = AuthBlogsCreateRouteImport.update({
+  id: '/blogs/create',
+  path: '/blogs/create',
+  getParentRoute: () => AuthRoute,
+} as any)
+const AuthAuthorsCreateRoute = AuthAuthorsCreateRouteImport.update({
+  id: '/authors/create',
+  path: '/authors/create',
+  getParentRoute: () => AuthRoute,
+} as any)
+const AuthTripsEditIdRoute = AuthTripsEditIdRouteImport.update({
+  id: '/trips/edit/$id',
+  path: '/trips/edit/$id',
+  getParentRoute: () => AuthRoute,
+} as any)
+const AuthTagsEditIdRoute = AuthTagsEditIdRouteImport.update({
+  id: '/tags/edit/$id',
+  path: '/tags/edit/$id',
+  getParentRoute: () => AuthRoute,
+} as any)
+const AuthDestinationsEditIdRoute = AuthDestinationsEditIdRouteImport.update({
+  id: '/destinations/edit/$id',
+  path: '/destinations/edit/$id',
+  getParentRoute: () => AuthRoute,
+} as any)
+const AuthDeparturesEditIdRoute = AuthDeparturesEditIdRouteImport.update({
+  id: '/departures/edit/$id',
+  path: '/departures/edit/$id',
+  getParentRoute: () => AuthRoute,
+} as any)
+const AuthBlogsEditIdRoute = AuthBlogsEditIdRouteImport.update({
+  id: '/blogs/edit/$id',
+  path: '/blogs/edit/$id',
+  getParentRoute: () => AuthRoute,
+} as any)
+const AuthAuthorsEditIdRoute = AuthAuthorsEditIdRouteImport.update({
+  id: '/authors/edit/$id',
+  path: '/authors/edit/$id',
+  getParentRoute: () => AuthRoute,
 } as any)
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
-  '/users': typeof UsersRoute
-  '/api/demo-names': typeof ApiDemoNamesRoute
-  '/api/demo-tq-todos': typeof ApiDemoTqTodosRoute
-  '/demo/store': typeof DemoStoreRoute
-  '/demo/table': typeof DemoTableRoute
-  '/demo/tanstack-query': typeof DemoTanstackQueryRoute
-  '/demo/start/api-request': typeof DemoStartApiRequestRoute
-  '/demo/start/server-funcs': typeof DemoStartServerFuncsRoute
+  '/login': typeof LoginRoute
+  '/profile': typeof AuthProfileRoute
+  '/authors/create': typeof AuthAuthorsCreateRoute
+  '/blogs/create': typeof AuthBlogsCreateRoute
+  '/bookings/$id': typeof AuthBookingsIdRoute
+  '/departures/create': typeof AuthDeparturesCreateRoute
+  '/destinations/create': typeof AuthDestinationsCreateRoute
+  '/inquiries/$id': typeof AuthInquiriesIdRoute
+  '/settings/landing-page': typeof AuthSettingsLandingPageRoute
+  '/settings/navbar': typeof AuthSettingsNavbarRoute
+  '/tags/create': typeof AuthTagsCreateRoute
+  '/trips/create': typeof AuthTripsCreateRoute
+  '/authors/': typeof AuthAuthorsIndexRoute
+  '/blogs/': typeof AuthBlogsIndexRoute
+  '/bookings/': typeof AuthBookingsIndexRoute
+  '/dashboard/': typeof AuthDashboardIndexRoute
+  '/departures/': typeof AuthDeparturesIndexRoute
+  '/destinations/': typeof AuthDestinationsIndexRoute
+  '/inquiries/': typeof AuthInquiriesIndexRoute
+  '/media/': typeof AuthMediaIndexRoute
+  '/newsletter/': typeof AuthNewsletterIndexRoute
+  '/reviews/': typeof AuthReviewsIndexRoute
+  '/tags/': typeof AuthTagsIndexRoute
+  '/trips/': typeof AuthTripsIndexRoute
+  '/users/': typeof AuthUsersIndexRoute
+  '/authors/edit/$id': typeof AuthAuthorsEditIdRoute
+  '/blogs/edit/$id': typeof AuthBlogsEditIdRoute
+  '/departures/edit/$id': typeof AuthDeparturesEditIdRoute
+  '/destinations/edit/$id': typeof AuthDestinationsEditIdRoute
+  '/tags/edit/$id': typeof AuthTagsEditIdRoute
+  '/trips/edit/$id': typeof AuthTripsEditIdRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
-  '/users': typeof UsersRoute
-  '/api/demo-names': typeof ApiDemoNamesRoute
-  '/api/demo-tq-todos': typeof ApiDemoTqTodosRoute
-  '/demo/store': typeof DemoStoreRoute
-  '/demo/table': typeof DemoTableRoute
-  '/demo/tanstack-query': typeof DemoTanstackQueryRoute
-  '/demo/start/api-request': typeof DemoStartApiRequestRoute
-  '/demo/start/server-funcs': typeof DemoStartServerFuncsRoute
+  '/login': typeof LoginRoute
+  '/profile': typeof AuthProfileRoute
+  '/authors/create': typeof AuthAuthorsCreateRoute
+  '/blogs/create': typeof AuthBlogsCreateRoute
+  '/bookings/$id': typeof AuthBookingsIdRoute
+  '/departures/create': typeof AuthDeparturesCreateRoute
+  '/destinations/create': typeof AuthDestinationsCreateRoute
+  '/inquiries/$id': typeof AuthInquiriesIdRoute
+  '/settings/landing-page': typeof AuthSettingsLandingPageRoute
+  '/settings/navbar': typeof AuthSettingsNavbarRoute
+  '/tags/create': typeof AuthTagsCreateRoute
+  '/trips/create': typeof AuthTripsCreateRoute
+  '/authors': typeof AuthAuthorsIndexRoute
+  '/blogs': typeof AuthBlogsIndexRoute
+  '/bookings': typeof AuthBookingsIndexRoute
+  '/dashboard': typeof AuthDashboardIndexRoute
+  '/departures': typeof AuthDeparturesIndexRoute
+  '/destinations': typeof AuthDestinationsIndexRoute
+  '/inquiries': typeof AuthInquiriesIndexRoute
+  '/media': typeof AuthMediaIndexRoute
+  '/newsletter': typeof AuthNewsletterIndexRoute
+  '/reviews': typeof AuthReviewsIndexRoute
+  '/tags': typeof AuthTagsIndexRoute
+  '/trips': typeof AuthTripsIndexRoute
+  '/users': typeof AuthUsersIndexRoute
+  '/authors/edit/$id': typeof AuthAuthorsEditIdRoute
+  '/blogs/edit/$id': typeof AuthBlogsEditIdRoute
+  '/departures/edit/$id': typeof AuthDeparturesEditIdRoute
+  '/destinations/edit/$id': typeof AuthDestinationsEditIdRoute
+  '/tags/edit/$id': typeof AuthTagsEditIdRoute
+  '/trips/edit/$id': typeof AuthTripsEditIdRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
   '/': typeof IndexRoute
-  '/users': typeof UsersRoute
-  '/api/demo-names': typeof ApiDemoNamesRoute
-  '/api/demo-tq-todos': typeof ApiDemoTqTodosRoute
-  '/demo/store': typeof DemoStoreRoute
-  '/demo/table': typeof DemoTableRoute
-  '/demo/tanstack-query': typeof DemoTanstackQueryRoute
-  '/demo/start/api-request': typeof DemoStartApiRequestRoute
-  '/demo/start/server-funcs': typeof DemoStartServerFuncsRoute
+  '/_auth': typeof AuthRouteWithChildren
+  '/login': typeof LoginRoute
+  '/_auth/profile': typeof AuthProfileRoute
+  '/_auth/authors/create': typeof AuthAuthorsCreateRoute
+  '/_auth/blogs/create': typeof AuthBlogsCreateRoute
+  '/_auth/bookings/$id': typeof AuthBookingsIdRoute
+  '/_auth/departures/create': typeof AuthDeparturesCreateRoute
+  '/_auth/destinations/create': typeof AuthDestinationsCreateRoute
+  '/_auth/inquiries/$id': typeof AuthInquiriesIdRoute
+  '/_auth/settings/landing-page': typeof AuthSettingsLandingPageRoute
+  '/_auth/settings/navbar': typeof AuthSettingsNavbarRoute
+  '/_auth/tags/create': typeof AuthTagsCreateRoute
+  '/_auth/trips/create': typeof AuthTripsCreateRoute
+  '/_auth/authors/': typeof AuthAuthorsIndexRoute
+  '/_auth/blogs/': typeof AuthBlogsIndexRoute
+  '/_auth/bookings/': typeof AuthBookingsIndexRoute
+  '/_auth/dashboard/': typeof AuthDashboardIndexRoute
+  '/_auth/departures/': typeof AuthDeparturesIndexRoute
+  '/_auth/destinations/': typeof AuthDestinationsIndexRoute
+  '/_auth/inquiries/': typeof AuthInquiriesIndexRoute
+  '/_auth/media/': typeof AuthMediaIndexRoute
+  '/_auth/newsletter/': typeof AuthNewsletterIndexRoute
+  '/_auth/reviews/': typeof AuthReviewsIndexRoute
+  '/_auth/tags/': typeof AuthTagsIndexRoute
+  '/_auth/trips/': typeof AuthTripsIndexRoute
+  '/_auth/users/': typeof AuthUsersIndexRoute
+  '/_auth/authors/edit/$id': typeof AuthAuthorsEditIdRoute
+  '/_auth/blogs/edit/$id': typeof AuthBlogsEditIdRoute
+  '/_auth/departures/edit/$id': typeof AuthDeparturesEditIdRoute
+  '/_auth/destinations/edit/$id': typeof AuthDestinationsEditIdRoute
+  '/_auth/tags/edit/$id': typeof AuthTagsEditIdRoute
+  '/_auth/trips/edit/$id': typeof AuthTripsEditIdRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
   fullPaths:
     | '/'
-    | '/users'
-    | '/api/demo-names'
-    | '/api/demo-tq-todos'
-    | '/demo/store'
-    | '/demo/table'
-    | '/demo/tanstack-query'
-    | '/demo/start/api-request'
-    | '/demo/start/server-funcs'
+    | '/login'
+    | '/profile'
+    | '/authors/create'
+    | '/blogs/create'
+    | '/bookings/$id'
+    | '/departures/create'
+    | '/destinations/create'
+    | '/inquiries/$id'
+    | '/settings/landing-page'
+    | '/settings/navbar'
+    | '/tags/create'
+    | '/trips/create'
+    | '/authors/'
+    | '/blogs/'
+    | '/bookings/'
+    | '/dashboard/'
+    | '/departures/'
+    | '/destinations/'
+    | '/inquiries/'
+    | '/media/'
+    | '/newsletter/'
+    | '/reviews/'
+    | '/tags/'
+    | '/trips/'
+    | '/users/'
+    | '/authors/edit/$id'
+    | '/blogs/edit/$id'
+    | '/departures/edit/$id'
+    | '/destinations/edit/$id'
+    | '/tags/edit/$id'
+    | '/trips/edit/$id'
   fileRoutesByTo: FileRoutesByTo
   to:
     | '/'
+    | '/login'
+    | '/profile'
+    | '/authors/create'
+    | '/blogs/create'
+    | '/bookings/$id'
+    | '/departures/create'
+    | '/destinations/create'
+    | '/inquiries/$id'
+    | '/settings/landing-page'
+    | '/settings/navbar'
+    | '/tags/create'
+    | '/trips/create'
+    | '/authors'
+    | '/blogs'
+    | '/bookings'
+    | '/dashboard'
+    | '/departures'
+    | '/destinations'
+    | '/inquiries'
+    | '/media'
+    | '/newsletter'
+    | '/reviews'
+    | '/tags'
+    | '/trips'
     | '/users'
-    | '/api/demo-names'
-    | '/api/demo-tq-todos'
-    | '/demo/store'
-    | '/demo/table'
-    | '/demo/tanstack-query'
-    | '/demo/start/api-request'
-    | '/demo/start/server-funcs'
+    | '/authors/edit/$id'
+    | '/blogs/edit/$id'
+    | '/departures/edit/$id'
+    | '/destinations/edit/$id'
+    | '/tags/edit/$id'
+    | '/trips/edit/$id'
   id:
     | '__root__'
     | '/'
-    | '/users'
-    | '/api/demo-names'
-    | '/api/demo-tq-todos'
-    | '/demo/store'
-    | '/demo/table'
-    | '/demo/tanstack-query'
-    | '/demo/start/api-request'
-    | '/demo/start/server-funcs'
+    | '/_auth'
+    | '/login'
+    | '/_auth/profile'
+    | '/_auth/authors/create'
+    | '/_auth/blogs/create'
+    | '/_auth/bookings/$id'
+    | '/_auth/departures/create'
+    | '/_auth/destinations/create'
+    | '/_auth/inquiries/$id'
+    | '/_auth/settings/landing-page'
+    | '/_auth/settings/navbar'
+    | '/_auth/tags/create'
+    | '/_auth/trips/create'
+    | '/_auth/authors/'
+    | '/_auth/blogs/'
+    | '/_auth/bookings/'
+    | '/_auth/dashboard/'
+    | '/_auth/departures/'
+    | '/_auth/destinations/'
+    | '/_auth/inquiries/'
+    | '/_auth/media/'
+    | '/_auth/newsletter/'
+    | '/_auth/reviews/'
+    | '/_auth/tags/'
+    | '/_auth/trips/'
+    | '/_auth/users/'
+    | '/_auth/authors/edit/$id'
+    | '/_auth/blogs/edit/$id'
+    | '/_auth/departures/edit/$id'
+    | '/_auth/destinations/edit/$id'
+    | '/_auth/tags/edit/$id'
+    | '/_auth/trips/edit/$id'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
-  UsersRoute: typeof UsersRoute
-  ApiDemoNamesRoute: typeof ApiDemoNamesRoute
-  ApiDemoTqTodosRoute: typeof ApiDemoTqTodosRoute
-  DemoStoreRoute: typeof DemoStoreRoute
-  DemoTableRoute: typeof DemoTableRoute
-  DemoTanstackQueryRoute: typeof DemoTanstackQueryRoute
-  DemoStartApiRequestRoute: typeof DemoStartApiRequestRoute
-  DemoStartServerFuncsRoute: typeof DemoStartServerFuncsRoute
+  AuthRoute: typeof AuthRouteWithChildren
+  LoginRoute: typeof LoginRoute
 }
 
 declare module '@tanstack/react-router' {
   interface FileRoutesByPath {
-    '/users': {
-      id: '/users'
-      path: '/users'
-      fullPath: '/users'
-      preLoaderRoute: typeof UsersRouteImport
+    '/login': {
+      id: '/login'
+      path: '/login'
+      fullPath: '/login'
+      preLoaderRoute: typeof LoginRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/_auth': {
+      id: '/_auth'
+      path: ''
+      fullPath: '/'
+      preLoaderRoute: typeof AuthRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/': {
@@ -163,78 +447,292 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof IndexRouteImport
       parentRoute: typeof rootRouteImport
     }
-    '/demo/tanstack-query': {
-      id: '/demo/tanstack-query'
-      path: '/demo/tanstack-query'
-      fullPath: '/demo/tanstack-query'
-      preLoaderRoute: typeof DemoTanstackQueryRouteImport
-      parentRoute: typeof rootRouteImport
+    '/_auth/profile': {
+      id: '/_auth/profile'
+      path: '/profile'
+      fullPath: '/profile'
+      preLoaderRoute: typeof AuthProfileRouteImport
+      parentRoute: typeof AuthRoute
     }
-    '/demo/table': {
-      id: '/demo/table'
-      path: '/demo/table'
-      fullPath: '/demo/table'
-      preLoaderRoute: typeof DemoTableRouteImport
-      parentRoute: typeof rootRouteImport
+    '/_auth/users/': {
+      id: '/_auth/users/'
+      path: '/users'
+      fullPath: '/users/'
+      preLoaderRoute: typeof AuthUsersIndexRouteImport
+      parentRoute: typeof AuthRoute
     }
-    '/demo/store': {
-      id: '/demo/store'
-      path: '/demo/store'
-      fullPath: '/demo/store'
-      preLoaderRoute: typeof DemoStoreRouteImport
-      parentRoute: typeof rootRouteImport
+    '/_auth/trips/': {
+      id: '/_auth/trips/'
+      path: '/trips'
+      fullPath: '/trips/'
+      preLoaderRoute: typeof AuthTripsIndexRouteImport
+      parentRoute: typeof AuthRoute
     }
-    '/api/demo-tq-todos': {
-      id: '/api/demo-tq-todos'
-      path: '/api/demo-tq-todos'
-      fullPath: '/api/demo-tq-todos'
-      preLoaderRoute: typeof ApiDemoTqTodosRouteImport
-      parentRoute: typeof rootRouteImport
+    '/_auth/tags/': {
+      id: '/_auth/tags/'
+      path: '/tags'
+      fullPath: '/tags/'
+      preLoaderRoute: typeof AuthTagsIndexRouteImport
+      parentRoute: typeof AuthRoute
     }
-    '/api/demo-names': {
-      id: '/api/demo-names'
-      path: '/api/demo-names'
-      fullPath: '/api/demo-names'
-      preLoaderRoute: typeof ApiDemoNamesRouteImport
-      parentRoute: typeof rootRouteImport
+    '/_auth/reviews/': {
+      id: '/_auth/reviews/'
+      path: '/reviews'
+      fullPath: '/reviews/'
+      preLoaderRoute: typeof AuthReviewsIndexRouteImport
+      parentRoute: typeof AuthRoute
     }
-    '/demo/start/server-funcs': {
-      id: '/demo/start/server-funcs'
-      path: '/demo/start/server-funcs'
-      fullPath: '/demo/start/server-funcs'
-      preLoaderRoute: typeof DemoStartServerFuncsRouteImport
-      parentRoute: typeof rootRouteImport
+    '/_auth/newsletter/': {
+      id: '/_auth/newsletter/'
+      path: '/newsletter'
+      fullPath: '/newsletter/'
+      preLoaderRoute: typeof AuthNewsletterIndexRouteImport
+      parentRoute: typeof AuthRoute
     }
-    '/demo/start/api-request': {
-      id: '/demo/start/api-request'
-      path: '/demo/start/api-request'
-      fullPath: '/demo/start/api-request'
-      preLoaderRoute: typeof DemoStartApiRequestRouteImport
-      parentRoute: typeof rootRouteImport
+    '/_auth/media/': {
+      id: '/_auth/media/'
+      path: '/media'
+      fullPath: '/media/'
+      preLoaderRoute: typeof AuthMediaIndexRouteImport
+      parentRoute: typeof AuthRoute
+    }
+    '/_auth/inquiries/': {
+      id: '/_auth/inquiries/'
+      path: '/inquiries'
+      fullPath: '/inquiries/'
+      preLoaderRoute: typeof AuthInquiriesIndexRouteImport
+      parentRoute: typeof AuthRoute
+    }
+    '/_auth/destinations/': {
+      id: '/_auth/destinations/'
+      path: '/destinations'
+      fullPath: '/destinations/'
+      preLoaderRoute: typeof AuthDestinationsIndexRouteImport
+      parentRoute: typeof AuthRoute
+    }
+    '/_auth/departures/': {
+      id: '/_auth/departures/'
+      path: '/departures'
+      fullPath: '/departures/'
+      preLoaderRoute: typeof AuthDeparturesIndexRouteImport
+      parentRoute: typeof AuthRoute
+    }
+    '/_auth/dashboard/': {
+      id: '/_auth/dashboard/'
+      path: '/dashboard'
+      fullPath: '/dashboard/'
+      preLoaderRoute: typeof AuthDashboardIndexRouteImport
+      parentRoute: typeof AuthRoute
+    }
+    '/_auth/bookings/': {
+      id: '/_auth/bookings/'
+      path: '/bookings'
+      fullPath: '/bookings/'
+      preLoaderRoute: typeof AuthBookingsIndexRouteImport
+      parentRoute: typeof AuthRoute
+    }
+    '/_auth/blogs/': {
+      id: '/_auth/blogs/'
+      path: '/blogs'
+      fullPath: '/blogs/'
+      preLoaderRoute: typeof AuthBlogsIndexRouteImport
+      parentRoute: typeof AuthRoute
+    }
+    '/_auth/authors/': {
+      id: '/_auth/authors/'
+      path: '/authors'
+      fullPath: '/authors/'
+      preLoaderRoute: typeof AuthAuthorsIndexRouteImport
+      parentRoute: typeof AuthRoute
+    }
+    '/_auth/trips/create': {
+      id: '/_auth/trips/create'
+      path: '/trips/create'
+      fullPath: '/trips/create'
+      preLoaderRoute: typeof AuthTripsCreateRouteImport
+      parentRoute: typeof AuthRoute
+    }
+    '/_auth/tags/create': {
+      id: '/_auth/tags/create'
+      path: '/tags/create'
+      fullPath: '/tags/create'
+      preLoaderRoute: typeof AuthTagsCreateRouteImport
+      parentRoute: typeof AuthRoute
+    }
+    '/_auth/settings/navbar': {
+      id: '/_auth/settings/navbar'
+      path: '/settings/navbar'
+      fullPath: '/settings/navbar'
+      preLoaderRoute: typeof AuthSettingsNavbarRouteImport
+      parentRoute: typeof AuthRoute
+    }
+    '/_auth/settings/landing-page': {
+      id: '/_auth/settings/landing-page'
+      path: '/settings/landing-page'
+      fullPath: '/settings/landing-page'
+      preLoaderRoute: typeof AuthSettingsLandingPageRouteImport
+      parentRoute: typeof AuthRoute
+    }
+    '/_auth/inquiries/$id': {
+      id: '/_auth/inquiries/$id'
+      path: '/inquiries/$id'
+      fullPath: '/inquiries/$id'
+      preLoaderRoute: typeof AuthInquiriesIdRouteImport
+      parentRoute: typeof AuthRoute
+    }
+    '/_auth/destinations/create': {
+      id: '/_auth/destinations/create'
+      path: '/destinations/create'
+      fullPath: '/destinations/create'
+      preLoaderRoute: typeof AuthDestinationsCreateRouteImport
+      parentRoute: typeof AuthRoute
+    }
+    '/_auth/departures/create': {
+      id: '/_auth/departures/create'
+      path: '/departures/create'
+      fullPath: '/departures/create'
+      preLoaderRoute: typeof AuthDeparturesCreateRouteImport
+      parentRoute: typeof AuthRoute
+    }
+    '/_auth/bookings/$id': {
+      id: '/_auth/bookings/$id'
+      path: '/bookings/$id'
+      fullPath: '/bookings/$id'
+      preLoaderRoute: typeof AuthBookingsIdRouteImport
+      parentRoute: typeof AuthRoute
+    }
+    '/_auth/blogs/create': {
+      id: '/_auth/blogs/create'
+      path: '/blogs/create'
+      fullPath: '/blogs/create'
+      preLoaderRoute: typeof AuthBlogsCreateRouteImport
+      parentRoute: typeof AuthRoute
+    }
+    '/_auth/authors/create': {
+      id: '/_auth/authors/create'
+      path: '/authors/create'
+      fullPath: '/authors/create'
+      preLoaderRoute: typeof AuthAuthorsCreateRouteImport
+      parentRoute: typeof AuthRoute
+    }
+    '/_auth/trips/edit/$id': {
+      id: '/_auth/trips/edit/$id'
+      path: '/trips/edit/$id'
+      fullPath: '/trips/edit/$id'
+      preLoaderRoute: typeof AuthTripsEditIdRouteImport
+      parentRoute: typeof AuthRoute
+    }
+    '/_auth/tags/edit/$id': {
+      id: '/_auth/tags/edit/$id'
+      path: '/tags/edit/$id'
+      fullPath: '/tags/edit/$id'
+      preLoaderRoute: typeof AuthTagsEditIdRouteImport
+      parentRoute: typeof AuthRoute
+    }
+    '/_auth/destinations/edit/$id': {
+      id: '/_auth/destinations/edit/$id'
+      path: '/destinations/edit/$id'
+      fullPath: '/destinations/edit/$id'
+      preLoaderRoute: typeof AuthDestinationsEditIdRouteImport
+      parentRoute: typeof AuthRoute
+    }
+    '/_auth/departures/edit/$id': {
+      id: '/_auth/departures/edit/$id'
+      path: '/departures/edit/$id'
+      fullPath: '/departures/edit/$id'
+      preLoaderRoute: typeof AuthDeparturesEditIdRouteImport
+      parentRoute: typeof AuthRoute
+    }
+    '/_auth/blogs/edit/$id': {
+      id: '/_auth/blogs/edit/$id'
+      path: '/blogs/edit/$id'
+      fullPath: '/blogs/edit/$id'
+      preLoaderRoute: typeof AuthBlogsEditIdRouteImport
+      parentRoute: typeof AuthRoute
+    }
+    '/_auth/authors/edit/$id': {
+      id: '/_auth/authors/edit/$id'
+      path: '/authors/edit/$id'
+      fullPath: '/authors/edit/$id'
+      preLoaderRoute: typeof AuthAuthorsEditIdRouteImport
+      parentRoute: typeof AuthRoute
     }
   }
 }
 
+interface AuthRouteChildren {
+  AuthProfileRoute: typeof AuthProfileRoute
+  AuthAuthorsCreateRoute: typeof AuthAuthorsCreateRoute
+  AuthBlogsCreateRoute: typeof AuthBlogsCreateRoute
+  AuthBookingsIdRoute: typeof AuthBookingsIdRoute
+  AuthDeparturesCreateRoute: typeof AuthDeparturesCreateRoute
+  AuthDestinationsCreateRoute: typeof AuthDestinationsCreateRoute
+  AuthInquiriesIdRoute: typeof AuthInquiriesIdRoute
+  AuthSettingsLandingPageRoute: typeof AuthSettingsLandingPageRoute
+  AuthSettingsNavbarRoute: typeof AuthSettingsNavbarRoute
+  AuthTagsCreateRoute: typeof AuthTagsCreateRoute
+  AuthTripsCreateRoute: typeof AuthTripsCreateRoute
+  AuthAuthorsIndexRoute: typeof AuthAuthorsIndexRoute
+  AuthBlogsIndexRoute: typeof AuthBlogsIndexRoute
+  AuthBookingsIndexRoute: typeof AuthBookingsIndexRoute
+  AuthDashboardIndexRoute: typeof AuthDashboardIndexRoute
+  AuthDeparturesIndexRoute: typeof AuthDeparturesIndexRoute
+  AuthDestinationsIndexRoute: typeof AuthDestinationsIndexRoute
+  AuthInquiriesIndexRoute: typeof AuthInquiriesIndexRoute
+  AuthMediaIndexRoute: typeof AuthMediaIndexRoute
+  AuthNewsletterIndexRoute: typeof AuthNewsletterIndexRoute
+  AuthReviewsIndexRoute: typeof AuthReviewsIndexRoute
+  AuthTagsIndexRoute: typeof AuthTagsIndexRoute
+  AuthTripsIndexRoute: typeof AuthTripsIndexRoute
+  AuthUsersIndexRoute: typeof AuthUsersIndexRoute
+  AuthAuthorsEditIdRoute: typeof AuthAuthorsEditIdRoute
+  AuthBlogsEditIdRoute: typeof AuthBlogsEditIdRoute
+  AuthDeparturesEditIdRoute: typeof AuthDeparturesEditIdRoute
+  AuthDestinationsEditIdRoute: typeof AuthDestinationsEditIdRoute
+  AuthTagsEditIdRoute: typeof AuthTagsEditIdRoute
+  AuthTripsEditIdRoute: typeof AuthTripsEditIdRoute
+}
+
+const AuthRouteChildren: AuthRouteChildren = {
+  AuthProfileRoute: AuthProfileRoute,
+  AuthAuthorsCreateRoute: AuthAuthorsCreateRoute,
+  AuthBlogsCreateRoute: AuthBlogsCreateRoute,
+  AuthBookingsIdRoute: AuthBookingsIdRoute,
+  AuthDeparturesCreateRoute: AuthDeparturesCreateRoute,
+  AuthDestinationsCreateRoute: AuthDestinationsCreateRoute,
+  AuthInquiriesIdRoute: AuthInquiriesIdRoute,
+  AuthSettingsLandingPageRoute: AuthSettingsLandingPageRoute,
+  AuthSettingsNavbarRoute: AuthSettingsNavbarRoute,
+  AuthTagsCreateRoute: AuthTagsCreateRoute,
+  AuthTripsCreateRoute: AuthTripsCreateRoute,
+  AuthAuthorsIndexRoute: AuthAuthorsIndexRoute,
+  AuthBlogsIndexRoute: AuthBlogsIndexRoute,
+  AuthBookingsIndexRoute: AuthBookingsIndexRoute,
+  AuthDashboardIndexRoute: AuthDashboardIndexRoute,
+  AuthDeparturesIndexRoute: AuthDeparturesIndexRoute,
+  AuthDestinationsIndexRoute: AuthDestinationsIndexRoute,
+  AuthInquiriesIndexRoute: AuthInquiriesIndexRoute,
+  AuthMediaIndexRoute: AuthMediaIndexRoute,
+  AuthNewsletterIndexRoute: AuthNewsletterIndexRoute,
+  AuthReviewsIndexRoute: AuthReviewsIndexRoute,
+  AuthTagsIndexRoute: AuthTagsIndexRoute,
+  AuthTripsIndexRoute: AuthTripsIndexRoute,
+  AuthUsersIndexRoute: AuthUsersIndexRoute,
+  AuthAuthorsEditIdRoute: AuthAuthorsEditIdRoute,
+  AuthBlogsEditIdRoute: AuthBlogsEditIdRoute,
+  AuthDeparturesEditIdRoute: AuthDeparturesEditIdRoute,
+  AuthDestinationsEditIdRoute: AuthDestinationsEditIdRoute,
+  AuthTagsEditIdRoute: AuthTagsEditIdRoute,
+  AuthTripsEditIdRoute: AuthTripsEditIdRoute,
+}
+
+const AuthRouteWithChildren = AuthRoute._addFileChildren(AuthRouteChildren)
+
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
-  UsersRoute: UsersRoute,
-  ApiDemoNamesRoute: ApiDemoNamesRoute,
-  ApiDemoTqTodosRoute: ApiDemoTqTodosRoute,
-  DemoStoreRoute: DemoStoreRoute,
-  DemoTableRoute: DemoTableRoute,
-  DemoTanstackQueryRoute: DemoTanstackQueryRoute,
-  DemoStartApiRequestRoute: DemoStartApiRequestRoute,
-  DemoStartServerFuncsRoute: DemoStartServerFuncsRoute,
+  AuthRoute: AuthRouteWithChildren,
+  LoginRoute: LoginRoute,
 }
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)
   ._addFileTypes<FileRouteTypes>()
-
-import type { getRouter } from './router.tsx'
-import type { createStart } from '@tanstack/react-start'
-declare module '@tanstack/react-start' {
-  interface Register {
-    ssr: true
-    router: Awaited<ReturnType<typeof getRouter>>
-  }
-}

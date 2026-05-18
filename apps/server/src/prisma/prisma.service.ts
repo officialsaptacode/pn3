@@ -3,19 +3,19 @@ import {
 	type OnModuleDestroy,
 	type OnModuleInit,
 } from "@nestjs/common";
-import type { ConfigService } from "@nestjs/config";
-import { PrismaClient } from "@prisma/client";
+import { ConfigService } from "@nestjs/config";
+import { PrismaClient } from "@/generated/client";
+import { PrismaPg } from '@prisma/adapter-pg'
 @Injectable()
 export class PrismaService
 	extends PrismaClient
 	implements OnModuleInit, OnModuleDestroy {
 	constructor(config: ConfigService) {
+		const adapter = new PrismaPg({
+			connectionString: config.get("DATABASE_URL")
+		})
 		super({
-			datasources: {
-				db: {
-					url: config.get("DATABASE_URL"),
-				},
-			},
+			adapter
 		});
 	}
 	async onModuleInit() {
@@ -28,13 +28,9 @@ export class PrismaService
 
 	async cleanDb() {
 		return this.$transaction([
-			this.users.deleteMany({}),
+			this.user.deleteMany({}),
 			// this.post.deleteMany({}),
 			// this.comment.deleteMany({}),
 		]);
-	}
-
-	async cleanDatabase() {
-		return this.cleanDb();
 	}
 }

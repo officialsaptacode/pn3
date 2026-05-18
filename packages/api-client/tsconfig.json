@@ -1,0 +1,10 @@
+{
+  "extends": "@workspace/typescript-config/base.json",
+  "compilerOptions": {
+    "baseUrl": ".",
+    "paths": {
+      "@workspace/api-client/*": ["./src/*"]
+    }
+  },
+  "include": ["src"]
+}

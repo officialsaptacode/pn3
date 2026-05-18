@@ -1,28 +1,89 @@
 generator client {
-  provider = "prisma-client"
-  output   = "../prisma/client"
+  provider = "prisma-client-js"
+  output   = "../src/generated"
 }
 
 datasource db {
-  provider  = "postgresql"
-
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
 }
 
-model Users {
-  id        Int      @id @default(autoincrement())
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
-  email     String   @unique
-  userName  String   @unique
+model User {
+  id        Int        @id @default(autoincrement())
+  createdAt DateTime   @default(now())
+  updatedAt DateTime   @updatedAt
+  email     String     @unique
+  userName  String     @unique
   hash      String
-  role      Role     @default(USER)
+  role      Role       @default(USER)
   hashedRt  String?
+  avatarId  Int?
+  avatar    Media?     @relation("UserAvatar", fields: [avatarId], references: [id])
+  media     Media[]    @relation("UserMedia")
 
   @@map("users")
+}
+
+model Media {
+  id               Int                @id @default(autoincrement())
+  createdAt        DateTime           @default(now())
+  updatedAt        DateTime           @updatedAt
+  type             MediaType
+  url              String
+  filename         String             @default("unknown")
+  mimeType         String             @default("application/octet-stream")
+  size             Int                @default(0)
+  width            Int?
+  height           Int?
+  thumbnailUrl     String?
+  caption          String?
+  altText          String?
+  folder           String?
+  s3Key            String             @default("")
+  s3Bucket         String             @default("")
+  displayOrder     Int                @default(0)
+  uploadedBy       Int?
+  user             User?              @relation("UserMedia", fields: [uploadedBy], references: [id])
+  userAvatars      User[]             @relation("UserAvatar")
+
+  @@index([folder])
+  @@index([type])
+  @@index([createdAt])
+  @@map("media")
+}
+
+model Setting {
+  id        Int      @id @default(autoincrement())
+  key       String   @unique
+  value     String
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@map("settings")
+}
+
+model Subscriber {
+  id        Int      @id @default(autoincrement())
+  createdAt DateTime @default(now())
+  email     String   @unique
+  isActive  Boolean  @default(true)
+
+  @@map("subscribers")
 }
 
 enum Role {
   ADMIN
   EDITOR
   USER
+}
+
+enum Status {
+  ARCHIVE
+  ACTIVE
+  INACTIVE
+}
+
+enum MediaType {
+  IMAGE
+  VIDEO
 }
