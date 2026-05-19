@@ -1,0 +1,44 @@
+{
+  "Navigation": {
+    "home": "Home",
+    "gorkha": "Gorkha",
+    "gandaki": "Gandaki Province",
+    "national": "National",
+    "sports": "Sports",
+    "entertainment": "Entertainment",
+    "business": "Business/Market",
+    "video": "Video",
+    "about": "About Us",
+    "international": "International",
+    "opinion": "Opinion",
+    "technology": "Technology",
+    "diaspora": "Nepali Abroad",
+    "breaking": "Breaking",
+    "news": "News",
+    "special": "Special",
+    "more": "More"
+  },
+  "Common": {
+    "readMore": "Read More",
+    "viewAll": "View All",
+    "breakingNews": "Breaking News",
+    "nepse": "NEPSE",
+    "searchPlaceholder": "Search news...",
+    "search": "Search",
+    "subscribe": "Subscribe",
+    "relatedNews": "Related News",
+    "copyright": "© 2024 Gorkha Daily. All rights reserved.",
+    "tagline": "Voice of Gorkha, News of Nepal. In service since 2018.",
+    "contact": "Contact",
+    "address": "📍 Gorkha Municipality-6, Harmtari",
+    "pressPolicy": "Press Policy",
+    "privacy": "Privacy"
+  },
+  "Ticker": {
+    "item1": "Large fire in Kathmandu — quick firefighter response",
+    "item2": "Budget passed in parliament — opposition protest continues",
+    "item3": "Earthquake tremor in Gorkha — no damage reported",
+    "item4": "Nepal-India sign new trade agreement",
+    "item5": "National cricket team secures Asia Cup spot"
+  }
+}

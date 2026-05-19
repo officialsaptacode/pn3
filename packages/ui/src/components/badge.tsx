@@ -14,6 +14,8 @@ const badgeVariants = cva(
         destructive:
           "border-transparent bg-destructive text-white [a&]:hover:bg-destructive/90 focus-visible:ring-destructive/20 dark:focus-visible:ring-destructive/40 dark:bg-destructive/60",
         outline: "text-foreground [a&]:hover:bg-accent [a&]:hover:text-accent-foreground",
+        "gorkha-category": "border-transparent bg-primary text-primary-foreground uppercase text-[12px] font-bold px-3 py-1 tracking-[0.5px]",
+        "gorkha-breaking": "border-transparent bg-destructive text-white uppercase text-[10px] font-bold px-2 py-0.5 mr-2",
       },
     },
     defaultVariants: {
