@@ -1,7 +1,7 @@
 import { createFileRoute } from "@tanstack/react-router";
 import { DestinationForm } from "./-components/destination-form";
 
-export const Route = createFileRoute("/_auth/destinations/create" as any)({
+export const Route = createFileRoute("/_auth/destinations/create")({
   validateSearch: (search: Record<string, unknown>) => ({
     parentId: search.parentId ? Number(search.parentId) : undefined,
   }),

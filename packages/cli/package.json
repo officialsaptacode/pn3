@@ -1,0 +1,12 @@
+{
+  "name": "create-shadow-app",
+  "version": "1.0.0",
+  "description": "Scaffold a new SaaS project instantly.",
+  "main": "index.js",
+  "bin": {
+    "create-shadow-app": "./index.js"
+  },
+  "scripts": {
+    "start": "node index.js"
+  }
+}

@@ -14,7 +14,6 @@ import { Route as AuthRouteImport } from './routes/_auth'
 import { Route as IndexRouteImport } from './routes/index'
 import { Route as AuthProfileRouteImport } from './routes/_auth/profile'
 import { Route as AuthUsersIndexRouteImport } from './routes/_auth/users/index'
-import { Route as AuthTripsIndexRouteImport } from './routes/_auth/trips/index'
 import { Route as AuthTagsIndexRouteImport } from './routes/_auth/tags/index'
 import { Route as AuthReviewsIndexRouteImport } from './routes/_auth/reviews/index'
 import { Route as AuthNewsletterIndexRouteImport } from './routes/_auth/newsletter/index'
@@ -26,7 +25,6 @@ import { Route as AuthDashboardIndexRouteImport } from './routes/_auth/dashboard
 import { Route as AuthBookingsIndexRouteImport } from './routes/_auth/bookings/index'
 import { Route as AuthBlogsIndexRouteImport } from './routes/_auth/blogs/index'
 import { Route as AuthAuthorsIndexRouteImport } from './routes/_auth/authors/index'
-import { Route as AuthTripsCreateRouteImport } from './routes/_auth/trips/create'
 import { Route as AuthTagsCreateRouteImport } from './routes/_auth/tags/create'
 import { Route as AuthSettingsNavbarRouteImport } from './routes/_auth/settings/navbar'
 import { Route as AuthSettingsLandingPageRouteImport } from './routes/_auth/settings/landing-page'
@@ -36,7 +34,6 @@ import { Route as AuthDeparturesCreateRouteImport } from './routes/_auth/departu
 import { Route as AuthBookingsIdRouteImport } from './routes/_auth/bookings/$id'
 import { Route as AuthBlogsCreateRouteImport } from './routes/_auth/blogs/create'
 import { Route as AuthAuthorsCreateRouteImport } from './routes/_auth/authors/create'
-import { Route as AuthTripsEditIdRouteImport } from './routes/_auth/trips/edit/$id'
 import { Route as AuthTagsEditIdRouteImport } from './routes/_auth/tags/edit/$id'
 import { Route as AuthDestinationsEditIdRouteImport } from './routes/_auth/destinations/edit/$id'
 import { Route as AuthDeparturesEditIdRouteImport } from './routes/_auth/departures/edit/$id'
@@ -65,11 +62,6 @@ const AuthProfileRoute = AuthProfileRouteImport.update({
 const AuthUsersIndexRoute = AuthUsersIndexRouteImport.update({
   id: '/users/',
   path: '/users/',
-  getParentRoute: () => AuthRoute,
-} as any)
-const AuthTripsIndexRoute = AuthTripsIndexRouteImport.update({
-  id: '/trips/',
-  path: '/trips/',
   getParentRoute: () => AuthRoute,
 } as any)
 const AuthTagsIndexRoute = AuthTagsIndexRouteImport.update({
@@ -127,11 +119,6 @@ const AuthAuthorsIndexRoute = AuthAuthorsIndexRouteImport.update({
   path: '/authors/',
   getParentRoute: () => AuthRoute,
 } as any)
-const AuthTripsCreateRoute = AuthTripsCreateRouteImport.update({
-  id: '/trips/create',
-  path: '/trips/create',
-  getParentRoute: () => AuthRoute,
-} as any)
 const AuthTagsCreateRoute = AuthTagsCreateRouteImport.update({
   id: '/tags/create',
   path: '/tags/create',
@@ -177,11 +164,6 @@ const AuthAuthorsCreateRoute = AuthAuthorsCreateRouteImport.update({
   path: '/authors/create',
   getParentRoute: () => AuthRoute,
 } as any)
-const AuthTripsEditIdRoute = AuthTripsEditIdRouteImport.update({
-  id: '/trips/edit/$id',
-  path: '/trips/edit/$id',
-  getParentRoute: () => AuthRoute,
-} as any)
 const AuthTagsEditIdRoute = AuthTagsEditIdRouteImport.update({
   id: '/tags/edit/$id',
   path: '/tags/edit/$id',
@@ -221,7 +203,6 @@ export interface FileRoutesByFullPath {
   '/settings/landing-page': typeof AuthSettingsLandingPageRoute
   '/settings/navbar': typeof AuthSettingsNavbarRoute
   '/tags/create': typeof AuthTagsCreateRoute
-  '/trips/create': typeof AuthTripsCreateRoute
   '/authors/': typeof AuthAuthorsIndexRoute
   '/blogs/': typeof AuthBlogsIndexRoute
   '/bookings/': typeof AuthBookingsIndexRoute
@@ -233,14 +214,12 @@ export interface FileRoutesByFullPath {
   '/newsletter/': typeof AuthNewsletterIndexRoute
   '/reviews/': typeof AuthReviewsIndexRoute
   '/tags/': typeof AuthTagsIndexRoute
-  '/trips/': typeof AuthTripsIndexRoute
   '/users/': typeof AuthUsersIndexRoute
   '/authors/edit/$id': typeof AuthAuthorsEditIdRoute
   '/blogs/edit/$id': typeof AuthBlogsEditIdRoute
   '/departures/edit/$id': typeof AuthDeparturesEditIdRoute
   '/destinations/edit/$id': typeof AuthDestinationsEditIdRoute
   '/tags/edit/$id': typeof AuthTagsEditIdRoute
-  '/trips/edit/$id': typeof AuthTripsEditIdRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
@@ -255,7 +234,6 @@ export interface FileRoutesByTo {
   '/settings/landing-page': typeof AuthSettingsLandingPageRoute
   '/settings/navbar': typeof AuthSettingsNavbarRoute
   '/tags/create': typeof AuthTagsCreateRoute
-  '/trips/create': typeof AuthTripsCreateRoute
   '/authors': typeof AuthAuthorsIndexRoute
   '/blogs': typeof AuthBlogsIndexRoute
   '/bookings': typeof AuthBookingsIndexRoute
@@ -267,14 +245,12 @@ export interface FileRoutesByTo {
   '/newsletter': typeof AuthNewsletterIndexRoute
   '/reviews': typeof AuthReviewsIndexRoute
   '/tags': typeof AuthTagsIndexRoute
-  '/trips': typeof AuthTripsIndexRoute
   '/users': typeof AuthUsersIndexRoute
   '/authors/edit/$id': typeof AuthAuthorsEditIdRoute
   '/blogs/edit/$id': typeof AuthBlogsEditIdRoute
   '/departures/edit/$id': typeof AuthDeparturesEditIdRoute
   '/destinations/edit/$id': typeof AuthDestinationsEditIdRoute
   '/tags/edit/$id': typeof AuthTagsEditIdRoute
-  '/trips/edit/$id': typeof AuthTripsEditIdRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
@@ -291,7 +267,6 @@ export interface FileRoutesById {
   '/_auth/settings/landing-page': typeof AuthSettingsLandingPageRoute
   '/_auth/settings/navbar': typeof AuthSettingsNavbarRoute
   '/_auth/tags/create': typeof AuthTagsCreateRoute
-  '/_auth/trips/create': typeof AuthTripsCreateRoute
   '/_auth/authors/': typeof AuthAuthorsIndexRoute
   '/_auth/blogs/': typeof AuthBlogsIndexRoute
   '/_auth/bookings/': typeof AuthBookingsIndexRoute
@@ -303,14 +278,12 @@ export interface FileRoutesById {
   '/_auth/newsletter/': typeof AuthNewsletterIndexRoute
   '/_auth/reviews/': typeof AuthReviewsIndexRoute
   '/_auth/tags/': typeof AuthTagsIndexRoute
-  '/_auth/trips/': typeof AuthTripsIndexRoute
   '/_auth/users/': typeof AuthUsersIndexRoute
   '/_auth/authors/edit/$id': typeof AuthAuthorsEditIdRoute
   '/_auth/blogs/edit/$id': typeof AuthBlogsEditIdRoute
   '/_auth/departures/edit/$id': typeof AuthDeparturesEditIdRoute
   '/_auth/destinations/edit/$id': typeof AuthDestinationsEditIdRoute
   '/_auth/tags/edit/$id': typeof AuthTagsEditIdRoute
-  '/_auth/trips/edit/$id': typeof AuthTripsEditIdRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
@@ -327,7 +300,6 @@ export interface FileRouteTypes {
     | '/settings/landing-page'
     | '/settings/navbar'
     | '/tags/create'
-    | '/trips/create'
     | '/authors/'
     | '/blogs/'
     | '/bookings/'
@@ -339,14 +311,12 @@ export interface FileRouteTypes {
     | '/newsletter/'
     | '/reviews/'
     | '/tags/'
-    | '/trips/'
     | '/users/'
     | '/authors/edit/$id'
     | '/blogs/edit/$id'
     | '/departures/edit/$id'
     | '/destinations/edit/$id'
     | '/tags/edit/$id'
-    | '/trips/edit/$id'
   fileRoutesByTo: FileRoutesByTo
   to:
     | '/'
@@ -361,7 +331,6 @@ export interface FileRouteTypes {
     | '/settings/landing-page'
     | '/settings/navbar'
     | '/tags/create'
-    | '/trips/create'
     | '/authors'
     | '/blogs'
     | '/bookings'
@@ -373,14 +342,12 @@ export interface FileRouteTypes {
     | '/newsletter'
     | '/reviews'
     | '/tags'
-    | '/trips'
     | '/users'
     | '/authors/edit/$id'
     | '/blogs/edit/$id'
     | '/departures/edit/$id'
     | '/destinations/edit/$id'
     | '/tags/edit/$id'
-    | '/trips/edit/$id'
   id:
     | '__root__'
     | '/'
@@ -396,7 +363,6 @@ export interface FileRouteTypes {
     | '/_auth/settings/landing-page'
     | '/_auth/settings/navbar'
     | '/_auth/tags/create'
-    | '/_auth/trips/create'
     | '/_auth/authors/'
     | '/_auth/blogs/'
     | '/_auth/bookings/'
@@ -408,14 +374,12 @@ export interface FileRouteTypes {
     | '/_auth/newsletter/'
     | '/_auth/reviews/'
     | '/_auth/tags/'
-    | '/_auth/trips/'
     | '/_auth/users/'
     | '/_auth/authors/edit/$id'
     | '/_auth/blogs/edit/$id'
     | '/_auth/departures/edit/$id'
     | '/_auth/destinations/edit/$id'
     | '/_auth/tags/edit/$id'
-    | '/_auth/trips/edit/$id'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
@@ -459,13 +423,6 @@ declare module '@tanstack/react-router' {
       path: '/users'
       fullPath: '/users/'
       preLoaderRoute: typeof AuthUsersIndexRouteImport
-      parentRoute: typeof AuthRoute
-    }
-    '/_auth/trips/': {
-      id: '/_auth/trips/'
-      path: '/trips'
-      fullPath: '/trips/'
-      preLoaderRoute: typeof AuthTripsIndexRouteImport
       parentRoute: typeof AuthRoute
     }
     '/_auth/tags/': {
@@ -545,13 +502,6 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthAuthorsIndexRouteImport
       parentRoute: typeof AuthRoute
     }
-    '/_auth/trips/create': {
-      id: '/_auth/trips/create'
-      path: '/trips/create'
-      fullPath: '/trips/create'
-      preLoaderRoute: typeof AuthTripsCreateRouteImport
-      parentRoute: typeof AuthRoute
-    }
     '/_auth/tags/create': {
       id: '/_auth/tags/create'
       path: '/tags/create'
@@ -615,13 +565,6 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthAuthorsCreateRouteImport
       parentRoute: typeof AuthRoute
     }
-    '/_auth/trips/edit/$id': {
-      id: '/_auth/trips/edit/$id'
-      path: '/trips/edit/$id'
-      fullPath: '/trips/edit/$id'
-      preLoaderRoute: typeof AuthTripsEditIdRouteImport
-      parentRoute: typeof AuthRoute
-    }
     '/_auth/tags/edit/$id': {
       id: '/_auth/tags/edit/$id'
       path: '/tags/edit/$id'
@@ -671,7 +614,6 @@ interface AuthRouteChildren {
   AuthSettingsLandingPageRoute: typeof AuthSettingsLandingPageRoute
   AuthSettingsNavbarRoute: typeof AuthSettingsNavbarRoute
   AuthTagsCreateRoute: typeof AuthTagsCreateRoute
-  AuthTripsCreateRoute: typeof AuthTripsCreateRoute
   AuthAuthorsIndexRoute: typeof AuthAuthorsIndexRoute
   AuthBlogsIndexRoute: typeof AuthBlogsIndexRoute
   AuthBookingsIndexRoute: typeof AuthBookingsIndexRoute
@@ -683,14 +625,12 @@ interface AuthRouteChildren {
   AuthNewsletterIndexRoute: typeof AuthNewsletterIndexRoute
   AuthReviewsIndexRoute: typeof AuthReviewsIndexRoute
   AuthTagsIndexRoute: typeof AuthTagsIndexRoute
-  AuthTripsIndexRoute: typeof AuthTripsIndexRoute
   AuthUsersIndexRoute: typeof AuthUsersIndexRoute
   AuthAuthorsEditIdRoute: typeof AuthAuthorsEditIdRoute
   AuthBlogsEditIdRoute: typeof AuthBlogsEditIdRoute
   AuthDeparturesEditIdRoute: typeof AuthDeparturesEditIdRoute
   AuthDestinationsEditIdRoute: typeof AuthDestinationsEditIdRoute
   AuthTagsEditIdRoute: typeof AuthTagsEditIdRoute
-  AuthTripsEditIdRoute: typeof AuthTripsEditIdRoute
 }
 
 const AuthRouteChildren: AuthRouteChildren = {
@@ -704,7 +644,6 @@ const AuthRouteChildren: AuthRouteChildren = {
   AuthSettingsLandingPageRoute: AuthSettingsLandingPageRoute,
   AuthSettingsNavbarRoute: AuthSettingsNavbarRoute,
   AuthTagsCreateRoute: AuthTagsCreateRoute,
-  AuthTripsCreateRoute: AuthTripsCreateRoute,
   AuthAuthorsIndexRoute: AuthAuthorsIndexRoute,
   AuthBlogsIndexRoute: AuthBlogsIndexRoute,
   AuthBookingsIndexRoute: AuthBookingsIndexRoute,
@@ -716,14 +655,12 @@ const AuthRouteChildren: AuthRouteChildren = {
   AuthNewsletterIndexRoute: AuthNewsletterIndexRoute,
   AuthReviewsIndexRoute: AuthReviewsIndexRoute,
   AuthTagsIndexRoute: AuthTagsIndexRoute,
-  AuthTripsIndexRoute: AuthTripsIndexRoute,
   AuthUsersIndexRoute: AuthUsersIndexRoute,
   AuthAuthorsEditIdRoute: AuthAuthorsEditIdRoute,
   AuthBlogsEditIdRoute: AuthBlogsEditIdRoute,
   AuthDeparturesEditIdRoute: AuthDeparturesEditIdRoute,
   AuthDestinationsEditIdRoute: AuthDestinationsEditIdRoute,
   AuthTagsEditIdRoute: AuthTagsEditIdRoute,
-  AuthTripsEditIdRoute: AuthTripsEditIdRoute,
 }
 
 const AuthRouteWithChildren = AuthRoute._addFileChildren(AuthRouteChildren)

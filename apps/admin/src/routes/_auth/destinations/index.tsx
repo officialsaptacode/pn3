@@ -7,7 +7,7 @@ import { useMemo } from "react";
 import { toast } from "sonner";
 import { type TreeNode, TreeView } from "@/components/tree-view";
 
-export const Route = createFileRoute("/_auth/destinations/" as any)({
+export const Route = createFileRoute("/_auth/destinations/")({
   component: DestinationsPage,
 });
 

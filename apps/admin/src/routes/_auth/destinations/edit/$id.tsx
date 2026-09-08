@@ -3,7 +3,7 @@ import { createFileRoute } from "@tanstack/react-router";
 import { destinationService } from "@workspace/api-client";
 import { DestinationForm } from "../-components/destination-form";
 
-export const Route = createFileRoute("/_auth/destinations/edit/$id" as any)({
+export const Route = createFileRoute("/_auth/destinations/edit/$id")({
   component: EditDestinationPage,
 });
 
