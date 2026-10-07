@@ -35,9 +35,28 @@ export class SmsProcessor extends WorkerHost {
         // Simulate network delay
         await new Promise(resolve => setTimeout(resolve, 100));
       } else {
-        // Here we would call the real AkashSMS API
         this.logger.log(`Sending SMS to ${phoneNumber} via AkashSMS API...`);
-        // Example: await fetch('https://aakashsms.com/admin/public/sms/v3/send', { ... })
+        const akashAuthToken = this.configService.get('AKASHSMS_AUTH_TOKEN');
+        if (!akashAuthToken) {
+          throw new Error('Missing AKASHSMS_AUTH_TOKEN in environment');
+        }
+
+        const response = await fetch('https://aakashsms.com/admin/public/sms/v3/send', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify({
+            auth_token: akashAuthToken,
+            to: phoneNumber,
+            text: payload.message
+          })
+        });
+
+        if (!response.ok) {
+          const errData = await response.text();
+          throw new Error(`AkashSMS API Error: ${response.status} - ${errData}`);
+        }
       }
 
       await this.prisma.smsJob.update({
