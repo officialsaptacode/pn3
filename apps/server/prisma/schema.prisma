@@ -20,6 +20,9 @@ model User {
   avatar    Media?     @relation("UserAvatar", fields: [avatarId], references: [id])
   media     Media[]    @relation("UserMedia")
 
+  smsTemplates SmsTemplate[]
+  campaigns Campaign[]
+
   @@map("users")
 }
 
@@ -44,6 +47,8 @@ model Media {
   uploadedBy       Int?
   user             User?              @relation("UserMedia", fields: [uploadedBy], references: [id])
   userAvatars      User[]             @relation("UserAvatar")
+
+  campaigns        Campaign[]
 
   @@index([folder])
   @@index([type])
@@ -85,4 +90,68 @@ enum Status {
 enum MediaType {
   IMAGE
   VIDEO
+}
+
+model SmsTemplate {
+  id          Int        @id @default(autoincrement())
+  createdAt   DateTime   @default(now())
+  updatedAt   DateTime   @updatedAt
+  name        String
+  content     String
+  layaScore   Float?     // System 1 Spam probability score
+  isApproved  Boolean    @default(false)
+  userId      Int
+  user        User       @relation(fields: [userId], references: [id])
+  campaigns   Campaign[]
+
+  @@map("sms_templates")
+}
+
+model Campaign {
+  id             Int        @id @default(autoincrement())
+  createdAt      DateTime   @default(now())
+  updatedAt      DateTime   @updatedAt
+  name           String
+  status         CampaignStatus @default(DRAFT)
+  templateId     Int
+  template       SmsTemplate @relation(fields: [templateId], references: [id])
+  csvMediaId     Int?       // The uploaded CSV via Presigned URL
+  csvMedia       Media?     @relation(fields: [csvMediaId], references: [id])
+  userId         Int
+  user           User       @relation(fields: [userId], references: [id])
+  totalRows      Int        @default(0)
+  processedRows  Int        @default(0)
+  failedRows     Int        @default(0)
+  smsJobs        SmsJob[]
+
+  @@map("campaigns")
+}
+
+model SmsJob {
+  id           Int        @id @default(autoincrement())
+  createdAt    DateTime   @default(now())
+  updatedAt    DateTime   @updatedAt
+  campaignId   Int
+  campaign     Campaign   @relation(fields: [campaignId], references: [id])
+  phoneNumber  String
+  payload      Json       // The interpolated template or just the data used to map it
+  status       SmsJobStatus @default(PENDING)
+  error        String?
+
+  @@index([campaignId])
+  @@map("sms_jobs")
+}
+
+enum CampaignStatus {
+  DRAFT
+  QUEUED
+  SENDING
+  COMPLETED
+  FAILED
+}
+
+enum SmsJobStatus {
+  PENDING
+  SENT
+  FAILED
 }
