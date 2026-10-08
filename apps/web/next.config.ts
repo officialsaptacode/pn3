@@ -1,5 +1,5 @@
-import createNextIntlPlugin from "next-intl/plugin";
 import type { NextConfig } from "next";
+import createNextIntlPlugin from "next-intl/plugin";
 
 const withNextIntl = createNextIntlPlugin("./src/i18n/request.ts");
 
@@ -38,15 +38,7 @@ const nextConfig: NextConfig = {
     ],
   },
   async redirects() {
-    return [
-      // Redirect old /treks/:slug routes to /packages/:slug temporarily
-      // TODO: Update to hierarchical routes once destination data is available
-      {
-        source: "/treks/:slug",
-        destination: "/packages/:slug",
-        permanent: false,
-      },
-    ];
+    return [];
   },
 };
 

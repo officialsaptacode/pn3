@@ -1,635 +1,184 @@
+import { Activity, ArrowRight, FileCheck2, LibraryBig, ShieldCheck, Zap } from "lucide-react";
 import { Link } from "@/i18n/routing";
-import { getArticles, getVideos, getOpinions } from "@/lib/api";
-import { Sidebar } from "@/components/sidebar";
-import { Newsletter } from "@/components/newsletter";
+import { DemoBubble } from "./demo-bubble";
 
-interface HomePageProps {
+interface LandingProps {
   params: Promise<{ locale: string }>;
 }
 
-export default async function HomePage({ params }: HomePageProps) {
+const STEPS = [
+  {
+    no: "01",
+    icon: FileCheck2,
+    en: {
+      title: "Draft once with AI",
+      body: "Write a rough reminder. System 2 polishes it to a polite 160-character template and keeps your {variables} intact.",
+    },
+    ne: {
+      title: "AI बाट एकपटक मस्यौदा",
+      body: "कच्चा रिमाइन्डर लेख्नुहोस्। System 2 ले यसलाई शिष्ट १६०-अक्षरको टेम्प्लेट बनाउँछ र {variables} जोगाउँछ।",
+    },
+  },
+  {
+    no: "02",
+    icon: ShieldCheck,
+    en: {
+      title: "Pass Laya compliance",
+      body: "System 1 scores the template for spam and compliance risk. Under 0.5 gets the stamp — blocked templates never send.",
+    },
+    ne: {
+      title: "Laya अनुपालन पास",
+      body: "System 1 ले टेम्प्लेटलाई स्पाम र अनुपालन जोखिमका लागि स्कोर गर्छ। ०.५ भन्दा कमले छाप पाउँछ — ब्लक भएका टेम्प्लेट कहिल्यै जाँदैनन्।",
+    },
+  },
+  {
+    no: "03",
+    icon: Zap,
+    en: {
+      title: "Drop a CSV, we queue it",
+      body: "Upload contacts straight to S3 from your browser. BullMQ interpolates rows and fires to AkashSMS at 50 SMS per second.",
+    },
+    ne: {
+      title: "CSV हाल्नुहोस्, हामी क्यु गर्छौं",
+      body: "सम्पर्कहरू ब्राउजरबाट सोझै S3 मा अपलोड गर्नुहोस्। BullMQ ले पङ्क्तिहरू भर्छ र AkashSMS मा प्रति सेकेन्ड ५० SMS पठाउँछ।",
+    },
+  },
+] as const;
+
+export default async function LandingPage({ params }: LandingProps) {
   const { locale } = await params;
   const isEn = locale === "en";
 
-  // Load all data from API client
-  const articles = await getArticles();
-  const videos = await getVideos();
-  const opinions = await getOpinions();
-
-  // Data selection
-  const featuredArticle = articles.find((a) => a.isFeatured) || articles[0];
-  if (!featuredArticle) {
-    return <div className="container py-8 text-center">No news articles found.</div>;
-  }
-  const sideHeroArticles = articles.filter((a) => a.slug !== featuredArticle.slug).slice(0, 3);
-  
-  const gorkhaArticles = articles.filter((a) => a.category === "gorkha");
-  const gorkhaFeatured = gorkhaArticles[0];
-  const gorkhaList = gorkhaArticles.slice(1, 5);
-
-  const gandakiArticles = articles.filter((a) => a.category === "gandaki");
-  const gandakiFeatured = gandakiArticles[0];
-  const gandakiList = gandakiArticles.slice(1, 5);
-
-  const nationalArticles = articles.filter((a) => a.category === "national");
-  const nationalFeatured = nationalArticles[0];
-  const nationalList = nationalArticles.slice(1, 5);
-
-  const sportsArticles = articles.filter((a) => a.category === "sports").slice(0, 3);
-  const businessArticles = articles.filter((a) => a.category === "business");
-  const internationalArticles = articles.filter((a) => a.category === "international").slice(0, 3);
-  const entertainmentArticles = articles.filter((a) => a.category === "entertainment").slice(0, 3);
-
   return (
-    <div className="container mx-auto px-4 py-6 md:py-8 space-y-8 max-w-[1200px]">
-      
-      {/* ═══ HERO SECTION ═══ */}
-      <section className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-        {/* Main Big Hero Card */}
-        {featuredArticle && (
-          <div className="lg:col-span-2 group relative rounded-2xl overflow-hidden shadow-md bg-card border border-border flex flex-col justify-end min-h-[300px] md:min-h-[460px] cursor-pointer">
-            <Link href={`/article/${featuredArticle.slug}`} className="absolute inset-0 z-0">
-              <img
-                src={featuredArticle.image}
-                alt=""
-                className="w-full h-full object-cover group-hover:scale-102 transition duration-500"
-              />
-              <div className="absolute inset-0 bg-gradient-to-t from-black/85 via-black/40 to-transparent"></div>
-            </Link>
-            <div className="relative z-10 p-6 md:p-8 space-y-3 pointer-events-none">
-              <span className="px-3 py-1 bg-red-600 text-white font-semibold text-xs rounded-full font-mukta uppercase tracking-wide">
-                {isEn ? "Featured" : "विशेष समाचार"}
-              </span>
-              <h2 className="text-xl md:text-3xl font-extrabold font-mukta text-white leading-tight group-hover:text-red-400 transition">
-                {isEn ? featuredArticle.title.en : featuredArticle.title.ne}
-              </h2>
-              <p className="text-white/80 text-sm md:text-base font-medium font-mukta line-clamp-2 max-w-3xl">
-                {isEn ? featuredArticle.summary.en : featuredArticle.summary.ne}
-              </p>
-              <div className="flex gap-4 items-center text-white/60 text-xs font-mono pt-2">
-                <span>{isEn ? featuredArticle.author.en : featuredArticle.author.ne}</span>
-                <span>•</span>
-                <span>{isEn ? featuredArticle.date.en : featuredArticle.date.ne}</span>
-              </div>
+    <div className="ledger-paper">
+      {/* Hero — the thesis you can touch */}
+      <section className="mx-auto max-w-6xl px-4 pb-14 pt-14 md:pt-20">
+        <div className="grid items-start gap-10 lg:grid-cols-[1fr_420px]">
+          <div>
+            <p className="mb-3 flex items-center gap-2 font-mono text-xs font-semibold uppercase tracking-[0.18em] text-teal-700">
+              <span className="inline-block h-px w-8 bg-ledger-500" aria-hidden />
+              {isEn
+                ? "Micro-finance SMS wrapper · AkashSMS pipe"
+                : "लघुवित्त SMS र्‍यापर · AkashSMS पाइप"}
+            </p>
+            <h1 className="font-sans text-4xl font-extrabold leading-[1.15] md:text-6xl">
+              {isEn ? (
+                <>
+                  Type a name. <span className="text-teal-600">Watch it become SMS.</span>
+                </>
+              ) : (
+                <>
+                  नाम लेख्नुहोस्। <span className="text-teal-600">SMS बन्न हेर्नुहोस्।</span>
+                </>
+              )}
+            </h1>
+            <p className="mt-5 max-w-xl text-[16px] leading-relaxed text-ink-700">
+              {isEn
+                ? "That bubble is the whole product: your CSV row, interpolated deterministically — zero AI per row, zero hallucinated loan amounts. The studio adds drafting, compliance, and the queue."
+                : "त्यो बबल नै सम्पूर्ण उत्पादन हो: तपाईंको CSV पङ्क्ति, नियतात्मक रूपमा भरिएको — प्रति पङ्क्ति शून्य AI, शून्य काल्पनिक कर्जा रकम। स्टुडियोले मस्यौदा, अनुपालन र क्यु थप्छ।"}
+            </p>
+            <div className="mt-8 flex flex-wrap gap-3">
+              <Link
+                href="/sms-campaign"
+                className="inline-flex items-center gap-2 rounded-lg bg-ink-900 px-6 py-3 text-sm font-bold text-white enabled:hover:bg-ink-950"
+              >
+                {isEn ? "Start a campaign" : "अभियान सुरु गर्नुहोस्"}
+                <ArrowRight className="h-4 w-4" aria-hidden />
+              </Link>
+              <Link
+                href="/templates"
+                className="inline-flex items-center gap-2 rounded-lg border border-paper-300 bg-paper-50 px-6 py-3 text-sm font-bold text-ink-900 enabled:hover:border-teal-600"
+              >
+                <LibraryBig className="h-4 w-4" aria-hidden />
+                {isEn ? "Browse templates" : "टेम्प्लेट हेर्नुहोस्"}
+              </Link>
             </div>
+            <dl className="mt-10 grid max-w-xl grid-cols-3 gap-4 border-t border-paper-300 pt-6">
+              {[
+                { k: isEn ? "per second" : "प्रति सेकेन्ड", v: "50 SMS" },
+                { k: isEn ? "per template" : "प्रति टेम्प्लेट", v: "160 chars" },
+                { k: isEn ? "AI per row" : "प्रति पङ्क्ति AI", v: "0 — never" },
+              ].map((s) => (
+                <div key={s.v} className="flex flex-col">
+                  <dt className="order-2 mt-1 text-xs text-ink-500">{s.k}</dt>
+                  <dd className="font-mono text-xl font-extrabold text-ink-900 md:text-2xl">
+                    {s.v}
+                  </dd>
+                </div>
+              ))}
+            </dl>
           </div>
-        )}
-
-        {/* Side Stack Articles */}
-        <div className="space-y-4">
-          {sideHeroArticles.map((article) => (
-            <Link
-              key={article.slug}
-              href={`/article/${article.slug}`}
-              className="flex gap-4 p-4 rounded-xl border bg-card hover:border-primary/20 hover:shadow-sm transition group"
-            >
-              <img
-                src={article.image}
-                alt=""
-                className="w-24 h-20 object-cover rounded-lg shrink-0 border bg-muted"
-                loading="lazy"
-              />
-              <div className="space-y-1.5 min-w-0 flex flex-col justify-center">
-                <h3 className="font-mukta font-bold text-sm md:text-base leading-snug text-foreground group-hover:text-primary transition line-clamp-2">
-                  {isEn ? article.title.en : article.title.ne}
-                </h3>
-                <span className="text-xs text-muted-foreground font-mono block">
-                  {isEn ? article.date.en : article.date.ne}
-                </span>
-              </div>
-            </Link>
-          ))}
+          <DemoBubble locale={locale} />
         </div>
       </section>
 
-      {/* ═══ MAIN LAYOUT WITH SIDEBAR ═══ */}
-      <div className="flex flex-col lg:flex-row gap-8">
-        
-        {/* LEFT MAIN NEWS COLUMN */}
-        <div className="flex-grow space-y-10 min-w-0">
-          
-          {/* GORKHA SECTION */}
-          {gorkhaFeatured && (
-            <section className="space-y-4">
-              <div className="flex justify-between items-center border-b pb-2">
-                <h2 className="text-xl md:text-2xl font-bold font-mukta text-foreground relative pl-3 flex items-center">
-                  <span className="absolute left-0 w-1.5 h-full bg-primary rounded-full"></span>
-                  {isEn ? "Gorkha News" : "गोरखा समाचार"}
-                </h2>
-                <Link href="/category/gorkha" className="text-xs font-bold text-primary font-mukta hover:underline">
-                  {isEn ? "View All →" : "सबै हेर्नुस →"}
-                </Link>
-              </div>
-
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                {/* Featured Gorkha Card */}
-                <Link
-                  href={`/article/${gorkhaFeatured.slug}`}
-                  className="group rounded-xl border bg-card overflow-hidden shadow-sm flex flex-col"
-                >
-                  <img
-                    src={gorkhaFeatured.image}
-                    alt=""
-                    className="w-full h-48 md:h-56 object-cover group-hover:opacity-95 transition"
-                  />
-                  <div className="p-4 flex-grow flex flex-col justify-between space-y-3">
-                    <div className="space-y-2">
-                      <h3 className="font-mukta font-extrabold text-lg leading-snug text-foreground group-hover:text-primary transition line-clamp-2">
-                        {isEn ? gorkhaFeatured.title.en : gorkhaFeatured.title.ne}
-                      </h3>
-                      <p className="text-muted-foreground text-sm font-mukta line-clamp-2">
-                        {isEn ? gorkhaFeatured.summary.en : gorkhaFeatured.summary.ne}
-                      </p>
-                    </div>
-                    <div className="flex justify-between text-xs text-muted-foreground font-mono pt-2 border-t border-border/60">
-                      <span>{isEn ? gorkhaFeatured.author.en : gorkhaFeatured.author.ne}</span>
-                      <span>{isEn ? gorkhaFeatured.date.en : gorkhaFeatured.date.ne}</span>
-                    </div>
-                  </div>
-                </Link>
-
-                {/* Gorkha List Items */}
-                <div className="divide-y divide-border">
-                  {gorkhaList.length > 0 ? (
-                    gorkhaList.map((article) => (
-                      <Link
-                        key={article.slug}
-                        href={`/article/${article.slug}`}
-                        className="py-3 flex gap-3 group first:pt-0 last:pb-0"
-                      >
-                        <img
-                          src={article.image}
-                          alt=""
-                          className="w-20 h-15 object-cover rounded-lg shrink-0 border bg-muted"
-                          loading="lazy"
-                        />
-                        <div className="space-y-1 min-w-0">
-                          <h4 className="font-mukta font-bold text-sm leading-snug text-foreground group-hover:text-primary transition line-clamp-2">
-                            {isEn ? article.title.en : article.title.ne}
-                          </h4>
-                          <span className="text-xs text-muted-foreground font-mono block">
-                            {isEn ? article.date.en : article.date.ne}
-                          </span>
-                        </div>
-                      </Link>
-                    ))
-                  ) : (
-                    // Fallback list items if not enough specific mock articles
-                    articles.slice(2, 6).map((article) => (
-                      <Link
-                        key={article.slug}
-                        href={`/article/${article.slug}`}
-                        className="py-3 flex gap-3 group first:pt-0 last:pb-0"
-                      >
-                        <img
-                          src={article.image}
-                          alt=""
-                          className="w-20 h-15 object-cover rounded-lg shrink-0 border bg-muted"
-                          loading="lazy"
-                        />
-                        <div className="space-y-1 min-w-0">
-                          <h4 className="font-mukta font-bold text-sm leading-snug text-foreground group-hover:text-primary transition line-clamp-2">
-                            {isEn ? article.title.en : article.title.ne}
-                          </h4>
-                          <span className="text-xs text-muted-foreground font-mono block">
-                            {isEn ? article.date.en : article.date.ne}
-                          </span>
-                        </div>
-                      </Link>
-                    ))
-                  )}
+      {/* How it works */}
+      <section id="how" className="border-y border-paper-300 bg-paper-50">
+        <div className="mx-auto max-w-6xl scroll-mt-20 px-4 py-14">
+          <h2 className="font-sans text-2xl font-extrabold md:text-3xl">
+            {isEn ? "Three entries in the ledger." : "खातामा तीन प्रविष्टि।"}
+          </h2>
+          <p className="mt-2 max-w-xl text-[15px] text-ink-500">
+            {isEn
+              ? "One AI pass per campaign, one compliance gate, then pure string interpolation at queue speed."
+              : "प्रति अभियान एक AI पास, एक अनुपालन गेट, त्यसपछि क्यु गतिमा शुद्ध स्ट्रिङ प्रतिस्थापन।"}
+          </p>
+          <ol className="mt-8 grid gap-5 md:grid-cols-3">
+            {STEPS.map((s) => (
+              <li key={s.no} className="rounded-2xl border border-paper-300 bg-white p-6 shadow-sm">
+                <div className="flex items-center justify-between">
+                  <s.icon className="h-6 w-6 text-teal-600" aria-hidden />
+                  <span className="font-mono text-xs font-bold text-ink-500">{s.no}</span>
                 </div>
-              </div>
-            </section>
-          )}
-
-          {/* GANDAKI PROVINCE */}
-          {gandakiFeatured && (
-            <section className="space-y-4">
-              <div className="flex justify-between items-center border-b pb-2">
-                <h2 className="text-xl md:text-2xl font-bold font-mukta text-foreground relative pl-3 flex items-center">
-                  <span className="absolute left-0 w-1.5 h-full bg-primary rounded-full"></span>
-                  {isEn ? "Gandaki Province" : "गण्डकी प्रदेश"}
-                </h2>
-                <Link href="/category/gandaki" className="text-xs font-bold text-primary font-mukta hover:underline">
-                  {isEn ? "View All →" : "सबै हेर्नुस →"}
-                </Link>
-              </div>
-
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                {/* Featured Gandaki Card */}
-                <Link
-                  href={`/article/${gandakiFeatured.slug}`}
-                  className="group rounded-xl border bg-card overflow-hidden shadow-sm flex flex-col"
-                >
-                  <img
-                    src={gandakiFeatured.image}
-                    alt=""
-                    className="w-full h-48 md:h-56 object-cover group-hover:opacity-95 transition"
-                  />
-                  <div className="p-4 flex-grow flex flex-col justify-between space-y-3">
-                    <div className="space-y-2">
-                      <h3 className="font-mukta font-extrabold text-lg leading-snug text-foreground group-hover:text-primary transition line-clamp-2">
-                        {isEn ? gandakiFeatured.title.en : gandakiFeatured.title.ne}
-                      </h3>
-                      <p className="text-muted-foreground text-sm font-mukta line-clamp-2">
-                        {isEn ? gandakiFeatured.summary.en : gandakiFeatured.summary.ne}
-                      </p>
-                    </div>
-                    <div className="flex justify-between text-xs text-muted-foreground font-mono pt-2 border-t border-border/60">
-                      <span>{isEn ? gandakiFeatured.author.en : gandakiFeatured.author.ne}</span>
-                      <span>{isEn ? gandakiFeatured.date.en : gandakiFeatured.date.ne}</span>
-                    </div>
-                  </div>
-                </Link>
-
-                {/* Gandaki List Items */}
-                <div className="divide-y divide-border">
-                  {gandakiList.length > 0 ? (
-                    gandakiList.map((article) => (
-                      <Link
-                        key={article.slug}
-                        href={`/article/${article.slug}`}
-                        className="py-3 flex gap-3 group first:pt-0 last:pb-0"
-                      >
-                        <img
-                          src={article.image}
-                          alt=""
-                          className="w-20 h-15 object-cover rounded-lg shrink-0 border bg-muted"
-                          loading="lazy"
-                        />
-                        <div className="space-y-1 min-w-0">
-                          <h4 className="font-mukta font-bold text-sm leading-snug text-foreground group-hover:text-primary transition line-clamp-2">
-                            {isEn ? article.title.en : article.title.ne}
-                          </h4>
-                          <span className="text-xs text-muted-foreground font-mono block">
-                            {isEn ? article.date.en : article.date.ne}
-                          </span>
-                        </div>
-                      </Link>
-                    ))
-                  ) : (
-                    articles.slice(3, 7).map((article) => (
-                      <Link
-                        key={article.slug}
-                        href={`/article/${article.slug}`}
-                        className="py-3 flex gap-3 group first:pt-0 last:pb-0"
-                      >
-                        <img
-                          src={article.image}
-                          alt=""
-                          className="w-20 h-15 object-cover rounded-lg shrink-0 border bg-muted"
-                          loading="lazy"
-                        />
-                        <div className="space-y-1 min-w-0">
-                          <h4 className="font-mukta font-bold text-sm leading-snug text-foreground group-hover:text-primary transition line-clamp-2">
-                            {isEn ? article.title.en : article.title.ne}
-                          </h4>
-                          <span className="text-xs text-muted-foreground font-mono block">
-                            {isEn ? article.date.en : article.date.ne}
-                          </span>
-                        </div>
-                      </Link>
-                    ))
-                  )}
-                </div>
-              </div>
-            </section>
-          )}
-
-          {/* NATIONAL NEWS */}
-          {nationalFeatured && (
-            <section className="space-y-4">
-              <div className="flex justify-between items-center border-b pb-2">
-                <h2 className="text-xl md:text-2xl font-bold font-mukta text-foreground relative pl-3 flex items-center">
-                  <span className="absolute left-0 w-1.5 h-full bg-primary rounded-full"></span>
-                  {isEn ? "National News" : "राष्ट्रिय समाचार"}
-                </h2>
-                <Link href="/category/national" className="text-xs font-bold text-primary font-mukta hover:underline">
-                  {isEn ? "View All →" : "सबै हेर्नुस →"}
-                </Link>
-              </div>
-
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                {/* Featured National Card */}
-                <Link
-                  href={`/article/${nationalFeatured.slug}`}
-                  className="group rounded-xl border bg-card overflow-hidden shadow-sm flex flex-col"
-                >
-                  <img
-                    src={nationalFeatured.image}
-                    alt=""
-                    className="w-full h-48 md:h-56 object-cover group-hover:opacity-95 transition"
-                  />
-                  <div className="p-4 flex-grow flex flex-col justify-between space-y-3">
-                    <div className="space-y-2">
-                      <h3 className="font-mukta font-extrabold text-lg leading-snug text-foreground group-hover:text-primary transition line-clamp-2">
-                        {isEn ? nationalFeatured.title.en : nationalFeatured.title.ne}
-                      </h3>
-                      <p className="text-muted-foreground text-sm font-mukta line-clamp-2">
-                        {isEn ? nationalFeatured.summary.en : nationalFeatured.summary.ne}
-                      </p>
-                    </div>
-                    <div className="flex justify-between text-xs text-muted-foreground font-mono pt-2 border-t border-border/60">
-                      <span>{isEn ? nationalFeatured.author.en : nationalFeatured.author.ne}</span>
-                      <span>{isEn ? nationalFeatured.date.en : nationalFeatured.date.ne}</span>
-                    </div>
-                  </div>
-                </Link>
-
-                {/* National List Items */}
-                <div className="divide-y divide-border">
-                  {nationalList.length > 0 ? (
-                    nationalList.map((article) => (
-                      <Link
-                        key={article.slug}
-                        href={`/article/${article.slug}`}
-                        className="py-3 flex gap-3 group first:pt-0 last:pb-0"
-                      >
-                        <img
-                          src={article.image}
-                          alt=""
-                          className="w-20 h-15 object-cover rounded-lg shrink-0 border bg-muted"
-                          loading="lazy"
-                        />
-                        <div className="space-y-1 min-w-0">
-                          <h4 className="font-mukta font-bold text-sm leading-snug text-foreground group-hover:text-primary transition line-clamp-2">
-                            {isEn ? article.title.en : article.title.ne}
-                          </h4>
-                          <span className="text-xs text-muted-foreground font-mono block">
-                            {isEn ? article.date.en : article.date.ne}
-                          </span>
-                        </div>
-                      </Link>
-                    ))
-                  ) : (
-                    articles.slice(1, 5).map((article) => (
-                      <Link
-                        key={article.slug}
-                        href={`/article/${article.slug}`}
-                        className="py-3 flex gap-3 group first:pt-0 last:pb-0"
-                      >
-                        <img
-                          src={article.image}
-                          alt=""
-                          className="w-20 h-15 object-cover rounded-lg shrink-0 border bg-muted"
-                          loading="lazy"
-                        />
-                        <div className="space-y-1 min-w-0">
-                          <h4 className="font-mukta font-bold text-sm leading-snug text-foreground group-hover:text-primary transition line-clamp-2">
-                            {isEn ? article.title.en : article.title.ne}
-                          </h4>
-                          <span className="text-xs text-muted-foreground font-mono block">
-                            {isEn ? article.date.en : article.date.ne}
-                          </span>
-                        </div>
-                      </Link>
-                    ))
-                  )}
-                </div>
-              </div>
-            </section>
-          )}
-
-          {/* SPORTS */}
-          <section className="space-y-4">
-            <div className="flex justify-between items-center border-b pb-2">
-              <h2 className="text-xl md:text-2xl font-bold font-mukta text-foreground relative pl-3 flex items-center">
-                <span className="absolute left-0 w-1.5 h-full bg-primary rounded-full"></span>
-                {isEn ? "Sports" : "खेलकुद"}
-              </h2>
-              <Link href="/category/sports" className="text-xs font-bold text-primary font-mukta hover:underline">
-                {isEn ? "View All →" : "सबै हेर्नुस →"}
-              </Link>
-            </div>
-
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-              {sportsArticles.map((article) => (
-                <Link
-                  key={article.slug}
-                  href={`/article/${article.slug}`}
-                  className="group rounded-xl border bg-card overflow-hidden shadow-sm flex flex-col"
-                >
-                  <img
-                    src={article.image}
-                    alt=""
-                    className="w-full h-36 object-cover group-hover:opacity-95 transition"
-                    loading="lazy"
-                  />
-                  <div className="p-4 flex-grow flex flex-col justify-between space-y-2">
-                    <h3 className="font-mukta font-bold text-sm leading-snug text-foreground group-hover:text-primary transition line-clamp-3">
-                      {isEn ? article.title.en : article.title.ne}
-                    </h3>
-                    <span className="text-xs text-muted-foreground font-mono block pt-1 border-t border-border/60">
-                      {isEn ? article.date.en : article.date.ne}
-                    </span>
-                  </div>
-                </Link>
-              ))}
-            </div>
-          </section>
-
-          {/* BUSINESS / ECONOMY (Tinted Section) */}
-          <section className="bg-primary/5 border border-primary/10 rounded-2xl p-6 space-y-4">
-            <div className="flex justify-between items-center border-b border-primary/10 pb-2">
-              <h2 className="text-xl md:text-2xl font-bold font-mukta text-foreground relative pl-3 flex items-center">
-                <span className="absolute left-0 w-1.5 h-full bg-primary rounded-full"></span>
-                {isEn ? "Business & Economy" : "अर्थ तथा बाणिज्य"}
-              </h2>
-              <Link href="/category/business" className="text-xs font-bold text-primary font-mukta hover:underline">
-                {isEn ? "View All →" : "सबै हेर्नुस →"}
-              </Link>
-            </div>
-
-            <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-4">
-              {businessArticles.slice(0, 4).map((article) => (
-                <Link
-                  key={article.slug}
-                  href={`/article/${article.slug}`}
-                  className="group rounded-xl border bg-card overflow-hidden shadow-sm flex flex-col"
-                >
-                  <img
-                    src={article.image}
-                    alt=""
-                    className="w-full h-28 object-cover group-hover:opacity-95 transition"
-                    loading="lazy"
-                  />
-                  <div className="p-3 flex-grow flex flex-col justify-between space-y-2">
-                    <h3 className="font-mukta font-bold text-xs md:text-sm leading-snug text-foreground group-hover:text-primary transition line-clamp-3">
-                      {isEn ? article.title.en : article.title.ne}
-                    </h3>
-                    <span className="text-[10px] text-muted-foreground font-mono block">
-                      {isEn ? article.date.en : article.date.ne}
-                    </span>
-                  </div>
-                </Link>
-              ))}
-            </div>
-          </section>
-
-          {/* VIDEO NEWS STRIP */}
-          <section className="space-y-4">
-            <div className="flex justify-between items-center border-b pb-2">
-              <h2 className="text-xl md:text-2xl font-bold font-mukta text-foreground relative pl-3 flex items-center">
-                <span className="absolute left-0 w-1.5 h-full bg-primary rounded-full"></span>
-                {isEn ? "Video News" : "भिडियो समाचार"}
-              </h2>
-              <Link href="/video" className="text-xs font-bold text-primary font-mukta hover:underline">
-                {isEn ? "View All →" : "सबै हेर्नुस →"}
-              </Link>
-            </div>
-
-            <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-6">
-              {videos.slice(0, 3).map((video) => (
-                <Link
-                  key={video.slug}
-                  href="/video"
-                  className="group flex flex-col"
-                >
-                  <div className="relative rounded-xl overflow-hidden shadow-sm aspect-video bg-muted border border-border">
-                    <img
-                      src={video.image}
-                      alt=""
-                      className="w-full h-full object-cover group-hover:scale-102 transition duration-300"
-                      loading="lazy"
-                    />
-                    <div className="absolute inset-0 bg-black/20 flex items-center justify-center group-hover:bg-black/35 transition">
-                      <div className="w-12 h-12 bg-white/95 text-primary flex items-center justify-center rounded-full shadow-lg group-hover:scale-110 transition shrink-0">
-                        <span className="ml-1 text-red-600 text-lg">▶</span>
-                      </div>
-                    </div>
-                    <span className="absolute bottom-2 right-2 bg-black/75 text-white text-[10px] px-2 py-0.5 rounded font-mono">
-                      {video.duration}
-                    </span>
-                  </div>
-                  <div className="pt-3 space-y-1">
-                    <h3 className="font-mukta font-bold text-sm leading-snug text-foreground group-hover:text-primary transition line-clamp-2">
-                      {isEn ? video.title.en : video.title.ne}
-                    </h3>
-                    <span className="text-xs text-muted-foreground font-mono block">
-                      {isEn ? video.date.en : video.date.ne}
-                    </span>
-                  </div>
-                </Link>
-              ))}
-            </div>
-          </section>
-
-          {/* OPINIONS vs INTERNATIONAL */}
-          <section className="grid grid-cols-1 md:grid-cols-2 gap-8">
-            {/* Opinions columns */}
-            <div className="space-y-4">
-              <div className="flex justify-between items-center border-b pb-2">
-                <h2 className="text-lg md:text-xl font-bold font-mukta text-foreground relative pl-3 flex items-center">
-                  <span className="absolute left-0 w-1.5 h-full bg-primary rounded-full"></span>
-                  {isEn ? "Opinion" : "विचार"}
-                </h2>
-              </div>
-              <div className="space-y-4">
-                {opinions.slice(0, 3).map((opinion) => (
-                  <Link
-                    key={opinion.slug}
-                    href={`/article/gorkha-earthquake-10th-anniversary`} // route to main article page mock
-                    className="flex gap-4 p-4 rounded-xl border bg-card hover:border-primary/10 hover:shadow-sm transition group"
-                  >
-                    <div className="w-12 h-12 rounded-full bg-primary/10 border text-primary font-bold flex items-center justify-center shrink-0 uppercase text-sm font-mukta">
-                      {isEn ? opinion.author.initials.en : opinion.author.initials.ne}
-                    </div>
-                    <div className="space-y-1 min-w-0">
-                      <span className="text-xs font-semibold text-muted-foreground block">
-                        {isEn ? opinion.author.en : opinion.author.ne}
-                      </span>
-                      <h4 className="font-mukta font-bold text-sm md:text-base leading-snug text-foreground group-hover:text-primary transition line-clamp-2">
-                        {isEn ? opinion.title.en : opinion.title.ne}
-                      </h4>
-                      <span className="text-xs text-muted-foreground font-mono block">
-                        {isEn ? opinion.date.en : opinion.date.ne}
-                      </span>
-                    </div>
-                  </Link>
-                ))}
-              </div>
-            </div>
-
-            {/* International columns */}
-            <div className="space-y-4">
-              <div className="flex justify-between items-center border-b pb-2">
-                <h2 className="text-lg md:text-xl font-bold font-mukta text-foreground relative pl-3 flex items-center">
-                  <span className="absolute left-0 w-1.5 h-full bg-primary rounded-full"></span>
-                  {isEn ? "International" : "अन्तर्राष्ट्रिय"}
-                </h2>
-              </div>
-              <div className="space-y-3 divide-y divide-border">
-                {internationalArticles.map((article, idx) => (
-                  <Link
-                    key={article.slug}
-                    href={`/article/${article.slug}`}
-                    className={`flex gap-3 group block ${idx === 0 ? "pt-0" : "pt-3"}`}
-                  >
-                    <img
-                      src={article.image}
-                      alt=""
-                      className="w-20 h-15 object-cover rounded-lg shrink-0 border bg-muted"
-                      loading="lazy"
-                    />
-                    <div className="space-y-1 min-w-0 flex flex-col justify-center">
-                      <h4 className="font-mukta font-bold text-sm leading-snug text-foreground group-hover:text-primary transition line-clamp-2">
-                        {isEn ? article.title.en : article.title.ne}
-                      </h4>
-                      <span className="text-xs text-muted-foreground font-mono block">
-                        {isEn ? article.date.en : article.date.ne}
-                      </span>
-                    </div>
-                  </Link>
-                ))}
-              </div>
-            </div>
-          </section>
-
-          {/* ENTERTAINMENT */}
-          <section className="space-y-4">
-            <div className="flex justify-between items-center border-b pb-2">
-              <h2 className="text-xl md:text-2xl font-bold font-mukta text-foreground relative pl-3 flex items-center">
-                <span className="absolute left-0 w-1.5 h-full bg-primary rounded-full"></span>
-                {isEn ? "Entertainment" : "मनोरञ्जन"}
-              </h2>
-            </div>
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-              {entertainmentArticles.map((article) => (
-                <Link
-                  key={article.slug}
-                  href={`/article/${article.slug}`}
-                  className="group rounded-xl border bg-card overflow-hidden shadow-sm flex flex-col"
-                >
-                  <img
-                    src={article.image}
-                    alt=""
-                    className="w-full h-36 object-cover group-hover:opacity-95 transition"
-                    loading="lazy"
-                  />
-                  <div className="p-4 flex-grow flex flex-col justify-between space-y-2">
-                    <h3 className="font-mukta font-bold text-sm leading-snug text-foreground group-hover:text-primary transition line-clamp-3">
-                      {isEn ? article.title.en : article.title.ne}
-                    </h3>
-                    <span className="text-xs text-muted-foreground font-mono block pt-1 border-t border-border/60">
-                      {isEn ? article.date.en : article.date.ne}
-                    </span>
-                  </div>
-                </Link>
-              ))}
-            </div>
-          </section>
-
-          {/* NEWSLETTER */}
-          <Newsletter />
-
+                <h3 className="mt-4 font-sans text-lg font-bold">
+                  {isEn ? s.en.title : s.ne.title}
+                </h3>
+                <p className="mt-2 text-sm leading-relaxed text-ink-700">
+                  {isEn ? s.en.body : s.ne.body}
+                </p>
+              </li>
+            ))}
+          </ol>
+          <p className="mt-6">
+            <Link
+              href="/activity"
+              className="inline-flex items-center gap-2 text-sm font-semibold text-teal-700 underline underline-offset-2"
+            >
+              <Activity className="h-4 w-4" aria-hidden />
+              {isEn ? "See the launch ledger" : "प्रेषण खाता हेर्नुहोस्"}
+            </Link>
+          </p>
         </div>
+      </section>
 
-        {/* RIGHT SIDEBAR COLUMN */}
-        <Sidebar locale={locale} />
-
-      </div>
-
+      {/* Compliance band */}
+      <section className="mx-auto max-w-6xl px-4 py-14">
+        <div className="flex flex-col items-start gap-6 rounded-2xl bg-ink-900 p-8 text-white md:flex-row md:items-center md:p-10">
+          <span
+            aria-hidden
+            className="stamp rounded px-4 py-1.5 font-mono text-sm font-extrabold uppercase tracking-[0.2em] text-teal-100"
+          >
+            {isEn ? "✓ Approved" : "✓ स्वीकृत"}
+          </span>
+          <div className="flex-grow">
+            <h2 className="font-sans text-xl font-extrabold md:text-2xl">
+              {isEn ? "Compliance over creativity." : "रचनात्मकताभन्दा अनुपालन।"}
+            </h2>
+            <p className="mt-2 max-w-xl text-sm leading-relaxed text-white/70">
+              {isEn
+                ? "A wrong loan amount in a reminder destroys trust. That's why AI drafts the template once — and deterministic code fills every row. Hallucination surface: zero."
+                : "रिमाइन्डरमा गलत कर्जा रकमले विश्वास नष्ट गर्छ। त्यसैले AI ले टेम्प्लेट एकपटक बनाउँछ — र नियतात्मक कोडले हरेक पङ्क्ति भर्छ। भ्रमको सम्भावना: शून्य।"}
+            </p>
+          </div>
+          <Link
+            href="/sms-campaign"
+            className="inline-flex shrink-0 items-center gap-2 rounded-lg bg-ledger-500 px-6 py-3 text-sm font-bold text-ink-950 enabled:hover:brightness-110"
+          >
+            {isEn ? "Try the studio" : "स्टुडियो प्रयास गर्नुहोस्"}
+            <ArrowRight className="h-4 w-4" aria-hidden />
+          </Link>
+        </div>
+      </section>
     </div>
   );
 }
