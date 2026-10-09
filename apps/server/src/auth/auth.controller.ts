@@ -20,6 +20,12 @@ export class AuthController {
     };
   }
 
+  // Access token lives 150 minutes (see AuthService.signToken) — cookie
+  // expiry matches so the browser drops it at the same time.
+  private getAccessCookieOptions() {
+    return { ...this.getCookieOptions(), maxAge: 150 * 60 * 1000 };
+  }
+
   @Public()
   @Post("signup")
   @HttpCode(HttpStatus.CREATED)
@@ -28,6 +34,7 @@ export class AuthController {
     const options = this.getCookieOptions();
     console.log(`[Auth] Signup cookie set. Prod: ${process.env.NODE_ENV === "production"}`);
     res.cookie("refreshToken", tokens.refreshToken, options);
+    res.cookie("accessToken", tokens.accessToken, this.getAccessCookieOptions());
     return {
       accessToken: tokens.accessToken,
       role: tokens.role,
@@ -43,6 +50,7 @@ export class AuthController {
     const options = this.getCookieOptions();
     console.log(`[Auth] Signin cookie set. Prod: ${process.env.NODE_ENV === "production"}`);
     res.cookie("refreshToken", tokens.refreshToken, options);
+    res.cookie("accessToken", tokens.accessToken, this.getAccessCookieOptions());
     return { accessToken: tokens.accessToken, role: tokens.role, message: "Login successful" };
   }
 
@@ -50,7 +58,9 @@ export class AuthController {
   @HttpCode(HttpStatus.OK)
   async logout(@GetCurrentUserId() userId: number, @Res({ passthrough: true }) res: Response) {
     const options = this.getCookieOptions();
+    const accessOptions = this.getAccessCookieOptions();
     res.clearCookie("refreshToken", options);
+    res.clearCookie("accessToken", accessOptions);
     return this.authService.logout(userId);
   }
 
@@ -67,6 +77,7 @@ export class AuthController {
     const options = this.getCookieOptions();
     console.log(`[Auth] Refresh cookie set. Prod: ${process.env.NODE_ENV === "production"}`);
     res.cookie("refreshToken", tokens.refreshToken, options);
+    res.cookie("accessToken", tokens.accessToken, this.getAccessCookieOptions());
     return {
       accessToken: tokens.accessToken,
       role: tokens.role,

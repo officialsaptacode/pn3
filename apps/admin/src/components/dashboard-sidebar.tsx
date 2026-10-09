@@ -14,10 +14,12 @@ import {
 } from "@workspace/ui/components/sidebar";
 import {
   Command,
-  GalleryVerticalEnd,
+  FileText,
   Image as ImageIcon,
   LayoutDashboard,
   Mail,
+  MessageSquare,
+  Send,
   Users,
 } from "lucide-react";
 import type React from "react";
@@ -26,7 +28,7 @@ import { NavUser } from "./nav-user";
 const data = {
   teams: [
     {
-      name: "pn3 Boilerplate",
+      name: "Saptasms",
       logo: Command,
       plan: "Enterprise",
     },
@@ -68,6 +70,23 @@ const data = {
       ],
     },
     {
+      title: "SMS",
+      url: "#",
+      icon: MessageSquare,
+      items: [
+        {
+          title: "Campaigns",
+          url: "/sms/campaigns",
+          icon: Send,
+        },
+        {
+          title: "Templates",
+          url: "/sms/templates",
+          icon: FileText,
+        },
+      ],
+    },
+    {
       title: "Settings",
       url: "#",
       icon: LayoutDashboard,
@@ -98,7 +117,7 @@ export function DashboardSidebar({ ...props }: React.ComponentProps<typeof Sideb
                   <Command className="size-4" />
                 </div>
                 <div className="grid flex-1 text-left text-sm leading-tight">
-                  <span className="truncate font-semibold">pn3 Boilerplate</span>
+                  <span className="truncate font-semibold">Saptasms</span>
                   <span className="truncate text-xs">Admin Panel</span>
                 </div>
               </a>

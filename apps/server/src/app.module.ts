@@ -11,6 +11,8 @@ import { PrismaModule } from "@/prisma/prisma.module";
 import { SubscribersModule } from "@/subscribers/subscribers.module";
 import { UsersModule } from "@/users/users.module";
 import { SettingsModule } from "./settings/settings.module";
+import { SmsModule } from './sms/sms.module';
+import { BullModule } from '@nestjs/bullmq';
 
 @Module({
   imports: [
@@ -19,6 +21,12 @@ import { SettingsModule } from "./settings/settings.module";
     ConfigModule.forRoot({
       isGlobal: true,
       envFilePath: ".env",
+    }),
+    BullModule.forRoot({
+      connection: {
+        host: process.env.REDIS_HOST || 'localhost',
+        port: parseInt(process.env.REDIS_PORT) || 6379,
+      },
     }),
     PrismaModule,
     ThrottlerModule.forRoot([
@@ -43,6 +51,7 @@ import { SettingsModule } from "./settings/settings.module";
     EmailModule,
     SubscribersModule,
     SettingsModule,
+    SmsModule,
   ],
   providers: [
     {

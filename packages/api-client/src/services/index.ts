@@ -12,6 +12,7 @@ export * from "./media-service";
 export * from "./navbar-service";
 export * from "./review-service";
 export * from "./setting-service";
+export * from "./sms-service";
 export * from "./subscriber-service";
 export * from "./tag-service";
 export * from "./trip-service";

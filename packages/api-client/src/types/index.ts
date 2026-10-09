@@ -535,3 +535,70 @@ export interface DashboardChartData {
   bookings: number;
   confirmed: number;
 }
+
+export interface SmsListParams {
+  page?: number;
+  limit?: number;
+}
+
+export interface SmsListResult<T> {
+  data: T[];
+  total: number;
+}
+
+export interface SmsTemplateUser {
+  id: number;
+  email: string;
+}
+
+export interface SmsTemplateItem {
+  id: number;
+  name: string;
+  content: string;
+  layaScore: number | null;
+  isApproved: boolean;
+  createdAt: string;
+  user: SmsTemplateUser;
+  _count: { campaigns: number };
+}
+
+export interface SmsCampaignItem {
+  id: number;
+  name: string;
+  status: string;
+  totalRows: number;
+  processedRows: number;
+  failedRows: number;
+  createdAt: string;
+  template: { id: number; name: string };
+  user: SmsTemplateUser;
+  _count: { smsJobs: number };
+}
+
+export interface SmsStatusCount {
+  status: string;
+  _count: { status: number };
+}
+
+export interface SmsFailedJob {
+  id: number;
+  phoneNumber: string;
+  error: string | null;
+  createdAt: string;
+}
+
+export interface SmsCampaignDetail {
+  data: SmsCampaignItem & {
+    template: { id: number; name: string; content: string; isApproved: boolean };
+  };
+  statusBreakdown: SmsStatusCount[];
+  failedJobs: SmsFailedJob[];
+}
+
+export interface SmsOverview {
+  templates: number;
+  templatesApproved: number;
+  campaigns: number;
+  campaignsByStatus: SmsStatusCount[];
+  jobsByStatus: SmsStatusCount[];
+}

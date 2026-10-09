@@ -19,11 +19,15 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@workspace/ui/components/select";
+import { lazy, Suspense } from "react";
 import { useForm } from "react-hook-form";
 import { toast } from "sonner";
 import * as z from "zod";
 import { FormCard } from "@/components/form-card";
-import Tiptap from "@/components/tip-tap";
+
+// tiptap is the heaviest dep on form routes — split it out of the main chunk.
+const Tiptap = lazy(() => import("@/components/tip-tap"));
+
 import { useFormToast } from "@/hooks/use-form-toast";
 
 const destinationSchema = z.object({
@@ -197,7 +201,13 @@ export function DestinationForm({ initialData }: DestinationFormProps) {
               <FormItem>
                 <FormLabel>Description</FormLabel>
                 <FormControl>
-                  <Tiptap value={field.value} onChange={field.onChange} />
+                  <Suspense
+                    fallback={
+                      <div className="p-8 text-sm text-muted-foreground">Loading editor…</div>
+                    }
+                  >
+                    <Tiptap value={field.value} onChange={field.onChange} />
+                  </Suspense>
                 </FormControl>
                 <FormMessage />
               </FormItem>
