@@ -29,12 +29,9 @@ export interface Campaign {
 
 const API_BASE = process.env.NEXT_PUBLIC_API_URL?.replace(/\/$/, "") ?? "http://localhost:5000";
 
-function authHeaders(token?: string): HeadersInit {
-  return {
-    "Content-Type": "application/json",
-    ...(token ? { Authorization: `Bearer ${token}` } : {}),
-  };
-}
+// Session rides on httpOnly cookies (accessToken + refreshToken) set by the
+// API on signin — nothing secret ever touches JS or localStorage.
+const JSON_HEADERS: HeadersInit = { "Content-Type": "application/json" };
 
 async function handle<T>(res: Response): Promise<T> {
   if (!res.ok) {
@@ -44,26 +41,56 @@ async function handle<T>(res: Response): Promise<T> {
   return res.json() as Promise<T>;
 }
 
+export interface SessionUser {
+  id: number;
+  email: string;
+  role: string;
+}
+
+export const authApi = {
+  signin(userName: string, password: string) {
+    return fetch(`${API_BASE}/api/auth/signin`, {
+      method: "POST",
+      credentials: "include",
+      headers: JSON_HEADERS,
+      body: JSON.stringify({ userName, password }),
+    }).then(handle<{ role: string; message: string }>);
+  },
+  profile() {
+    return fetch(`${API_BASE}/api/users/profile`, { credentials: "include" }).then(
+      handle<SessionUser>,
+    );
+  },
+  signout() {
+    return fetch(`${API_BASE}/api/auth/logout`, {
+      method: "POST",
+      credentials: "include",
+    }).then(handle<unknown>);
+  },
+};
+
 export const smsApi = {
-  createTemplate(token: string | undefined, name: string, content: string) {
+  createTemplate(name: string, content: string) {
     return fetch(`${API_BASE}/api/sms/templates`, {
       method: "POST",
-      headers: authHeaders(token),
+      credentials: "include",
+      headers: JSON_HEADERS,
       body: JSON.stringify({ name, content }),
     }).then(handle<SmsTemplate>);
   },
 
-  evaluateTemplate(token: string | undefined, id: number) {
+  evaluateTemplate(id: number) {
     return fetch(`${API_BASE}/api/sms/templates/${id}/evaluate`, {
       method: "POST",
-      headers: authHeaders(token),
+      credentials: "include",
     }).then(handle<EvaluateResult & Partial<SmsTemplate>>);
   },
 
-  presignedUrl(token: string | undefined, filename: string, contentType: string) {
+  presignedUrl(filename: string, contentType: string) {
     return fetch(`${API_BASE}/api/sms/presigned-url`, {
       method: "POST",
-      headers: authHeaders(token),
+      credentials: "include",
+      headers: JSON_HEADERS,
       body: JSON.stringify({ filename, contentType }),
     }).then(handle<PresignedUrl>);
   },
@@ -78,10 +105,11 @@ export const smsApi = {
     });
   },
 
-  createCampaign(token: string | undefined, name: string, templateId: number, csvUrl: string) {
+  createCampaign(name: string, templateId: number, csvUrl: string) {
     return fetch(`${API_BASE}/api/sms/campaigns`, {
       method: "POST",
-      headers: authHeaders(token),
+      credentials: "include",
+      headers: JSON_HEADERS,
       body: JSON.stringify({ name, templateId, csvUrl }),
     }).then(handle<Campaign>);
   },

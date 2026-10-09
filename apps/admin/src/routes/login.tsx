@@ -94,7 +94,7 @@ function LoginPage() {
           </Form>
         </CardContent>
         <CardFooter className="flex justify-center border-t p-4">
-          <p className="text-sm text-muted-foreground">Project Travels Admin Panel</p>
+          <p className="text-sm text-muted-foreground">Sapta SMS Admin Panel</p>
         </CardFooter>
       </Card>
     </div>

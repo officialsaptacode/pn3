@@ -14,10 +14,12 @@ import {
 } from "@workspace/ui/components/sidebar";
 import {
   Command,
-  GalleryVerticalEnd,
+  FileText,
   Image as ImageIcon,
   LayoutDashboard,
   Mail,
+  MessageSquare,
+  Send,
   Users,
 } from "lucide-react";
 import type React from "react";
@@ -64,6 +66,23 @@ const data = {
           title: "Subscribers",
           url: "/newsletter",
           icon: Mail,
+        },
+      ],
+    },
+    {
+      title: "SMS",
+      url: "#",
+      icon: MessageSquare,
+      items: [
+        {
+          title: "Campaigns",
+          url: "/sms/campaigns",
+          icon: Send,
+        },
+        {
+          title: "Templates",
+          url: "/sms/templates",
+          icon: FileText,
         },
       ],
     },
