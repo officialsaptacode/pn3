@@ -3,8 +3,14 @@ import { createFileRoute } from "@tanstack/react-router";
 import { smsService } from "@workspace/api-client";
 import { Card, CardContent, CardHeader, CardTitle } from "@workspace/ui/components/card";
 import { format } from "date-fns";
+import { lazy, Suspense, useState } from "react";
 import { DataTable } from "@/components/data-table";
 import { StatusBadge } from "@/components/status-badge";
+
+// recharts rides in its own chunk — the detail page stays light without it.
+const DeliveryChart = lazy(() =>
+  import("./-components/delivery-chart").then((m) => ({ default: m.DeliveryChart })),
+);
 
 export const Route = createFileRoute("/_auth/sms/campaigns/$id")({
   component: SmsCampaignDetailPage,
@@ -13,10 +19,16 @@ export const Route = createFileRoute("/_auth/sms/campaigns/$id")({
 
 function SmsCampaignDetailPage() {
   const { id } = Route.useParams();
+  const [granularity, setGranularity] = useState<"hour" | "day">("hour");
 
   const { data, isLoading } = useQuery({
     queryKey: ["sms-campaign", id],
     queryFn: () => smsService.getCampaign(id),
+  });
+
+  const { data: analytics } = useQuery({
+    queryKey: ["sms-campaign-analytics", id, granularity],
+    queryFn: () => smsService.getCampaignAnalytics(id, { granularity }),
   });
 
   if (isLoading) {
@@ -119,6 +131,69 @@ function SmsCampaignDetailPage() {
           </CardContent>
         </Card>
       </div>
+
+      <div className="grid gap-4 md:grid-cols-4">
+        {[
+          {
+            label: "Delivery rate",
+            value: analytics ? `${Math.round(analytics.rates.sentRate * 100)}%` : "—",
+          },
+          { label: "Sent", value: analytics ? String(analytics.rates.sent) : "—" },
+          { label: "Failed", value: analytics ? String(analytics.rates.failed) : "—" },
+          { label: "Pending", value: analytics ? String(analytics.rates.pending) : "—" },
+        ].map((s) => (
+          <Card key={s.label}>
+            <CardHeader className="pb-2">
+              <CardTitle className="text-sm font-medium text-muted-foreground">{s.label}</CardTitle>
+            </CardHeader>
+            <CardContent>
+              <p className="text-2xl font-bold tabular-nums">{s.value}</p>
+            </CardContent>
+          </Card>
+        ))}
+      </div>
+
+      <Card>
+        <CardHeader className="flex flex-row items-center justify-between">
+          <CardTitle>Send activity</CardTitle>
+          <div className="flex gap-1 text-xs font-medium">
+            {(["hour", "day"] as const).map((g) => (
+              <button
+                key={g}
+                onClick={() => setGranularity(g)}
+                className={`rounded-md px-2.5 py-1 capitalize ${granularity === g ? "bg-primary text-primary-foreground" : "text-muted-foreground hover:bg-muted"}`}
+              >
+                {g === "hour" ? "Hourly" : "Daily"}
+              </button>
+            ))}
+          </div>
+        </CardHeader>
+        <CardContent>
+          <Suspense
+            fallback={<div className="p-8 text-sm text-muted-foreground">Loading chart…</div>}
+          >
+            <DeliveryChart data={analytics?.buckets || []} />
+          </Suspense>
+        </CardContent>
+      </Card>
+
+      {(analytics?.topErrors?.length ?? 0) > 0 && (
+        <Card>
+          <CardHeader>
+            <CardTitle>Top fail reasons</CardTitle>
+          </CardHeader>
+          <CardContent>
+            <ul className="space-y-2">
+              {(analytics?.topErrors || []).map((e: any) => (
+                <li key={e.error} className="flex items-center justify-between gap-4 text-sm">
+                  <span className="truncate text-destructive">{e.error || "Unknown"}</span>
+                  <span className="shrink-0 font-mono">×{e.count}</span>
+                </li>
+              ))}
+            </ul>
+          </CardContent>
+        </Card>
+      )}
 
       <Card>
         <CardHeader>

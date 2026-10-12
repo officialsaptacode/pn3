@@ -1,5 +1,14 @@
 import { Type } from "class-transformer";
-import { IsBooleanString, IsEnum, IsInt, IsOptional, IsString, Max, Min } from "class-validator";
+import {
+  IsBooleanString,
+  IsEnum,
+  IsIn,
+  IsInt,
+  IsOptional,
+  IsString,
+  Max,
+  Min,
+} from "class-validator";
 import { CampaignStatus } from "@/generated";
 
 export class SmsListQueryDto {
@@ -31,4 +40,10 @@ export class CampaignListQueryDto extends SmsListQueryDto {
   @IsEnum(CampaignStatus)
   @IsOptional()
   status?: CampaignStatus;
+}
+
+export class CampaignAnalyticsQueryDto {
+  @IsIn(['hour', 'day'])
+  @IsOptional()
+  granularity?: 'hour' | 'day' = 'hour';
 }

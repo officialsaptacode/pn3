@@ -55,3 +55,15 @@ Last updated: 2026-10-09 · Branch: `feat/ai-sms-wrapper` · PR: [#6](https://gi
 - [ ] AkashSMS delivery webhooks → job status reconciliation
 - [ ] Manager-scoped list endpoints so the web activity page shows real history instead of device-local data
 - [ ] Audit log for admin actions (approvals, retries, role changes)
+
+### Competitor gaps (NestSMS — nestsms.com)
+What the generic pipe has that the vertical wrapper still lacks. Our edge stays the AI compliance layer; everything below is table stakes to match.
+- [ ] **Developer SMS Gateway API** — authenticated public API (keys, docs) so client systems can trigger OTP/transactional SMS; today only the UI and admin can send
+- [ ] **Instant OTP path** — dedicated high-priority transactional route with delivery confirmation, separate from bulk promo queue
+- [x] **Real-time delivery reports + analytics** — `GET /api/sms/admin/campaigns/:id/analytics` (rates, hourly/daily buckets, top fail reasons); admin detail shows rate cards + lazy area chart + fail list — verified live on seed (67% sent)
+- [ ] **Multiple sender IDs** — branded sender management per client instead of a single pipe identity
+- [ ] **Contact management** — saved lists, bulk import history, and segmentation instead of one-shot CSV uploads
+- [ ] **Promotional vs transactional routing** — message-type separation (promo windows, transactional priority)
+- [ ] **Two-way messaging** — inbound replies / conversation view per campaign
+- [ ] **Client onboarding flow** — register → KYC documents → approval, mirroring Nepal's compliance expectations
+- [ ] **Billing tiers + wallet top-up** — volume tiers and eSewa top-up; no monetization exists today

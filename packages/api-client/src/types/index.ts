@@ -602,3 +602,22 @@ export interface SmsOverview {
   campaignsByStatus: SmsStatusCount[];
   jobsByStatus: SmsStatusCount[];
 }
+
+export interface SmsRateBucket {
+  t: string;
+  sent: number;
+  failed: number;
+}
+
+export interface SmsCampaignAnalytics {
+  rates: {
+    total: number;
+    sent: number;
+    failed: number;
+    pending: number;
+    sentRate: number;
+    failedRate: number;
+  };
+  buckets: SmsRateBucket[];
+  topErrors: { error: string | null; count: number }[];
+}

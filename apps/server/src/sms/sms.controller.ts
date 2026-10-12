@@ -2,7 +2,7 @@ import { Body, Controller, Get, Param, ParseIntPipe, Post, Query, UseGuards } fr
 import { GetCurrentUserId, Roles } from "@/auth/decorator";
 import { AtGuard, RolesGuard } from "@/auth/guard";
 import { Role } from "@/generated";
-import { CampaignListQueryDto, TemplateListQueryDto } from "./dto/sms-query.dto";
+import { CampaignAnalyticsQueryDto, CampaignListQueryDto, TemplateListQueryDto } from "./dto/sms-query.dto";
 import { SmsService } from "./sms.service";
 
 @Controller("sms")
@@ -70,5 +70,15 @@ export class SmsController {
   @Get("admin/campaigns/:id")
   getCampaign(@Param("id", ParseIntPipe) id: number) {
     return this.smsService.getCampaign(id);
+  }
+
+  @UseGuards(RolesGuard)
+  @Roles(Role.ADMIN)
+  @Get("admin/campaigns/:id/analytics")
+  getCampaignAnalytics(
+    @Param("id", ParseIntPipe) id: number,
+    @Query() query: CampaignAnalyticsQueryDto,
+  ) {
+    return this.smsService.getCampaignAnalytics(id, query);
   }
 }

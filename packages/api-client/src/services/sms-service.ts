@@ -1,5 +1,6 @@
 import { type FetchOptions, httpClient } from "../lib/fetch-client";
 import type {
+  SmsCampaignAnalytics,
   SmsCampaignDetail,
   SmsCampaignItem,
   SmsListResult,
@@ -30,6 +31,17 @@ export const smsService = {
 
   getCampaign: async (id: number | string, options?: FetchOptions): Promise<SmsCampaignDetail> => {
     return httpClient.get<SmsCampaignDetail>(`/api/sms/admin/campaigns/${id}`, options);
+  },
+
+  getCampaignAnalytics: async (
+    id: number | string,
+    params?: any,
+    options?: FetchOptions,
+  ): Promise<SmsCampaignAnalytics> => {
+    return httpClient.get<SmsCampaignAnalytics>(
+      `/api/sms/admin/campaigns/${id}/analytics`,
+      { ...options, params },
+    );
   },
 
   getOverview: async (options?: FetchOptions): Promise<SmsOverview> => {
