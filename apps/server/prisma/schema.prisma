@@ -123,6 +123,7 @@ model Campaign {
   processedRows  Int        @default(0)
   failedRows     Int        @default(0)
   smsJobs        SmsJob[]
+  sendAt         DateTime?  // scheduled send time (UTC)
 
   @@map("campaigns")
 }
@@ -140,6 +141,54 @@ model SmsJob {
 
   @@index([campaignId])
   @@map("sms_jobs")
+}
+
+model OptOut {
+  id          Int        @id @default(autoincrement())
+  createdAt   DateTime   @default(now())
+  phoneNumber String
+  campaignId  Int?       // nullable – opt‑out may be global or campaign‑specific
+  campaign    Campaign?  @relation(fields: [campaignId], references: [id])
+  @@map("opt_outs")
+}
+
+model ContactList {
+  id            Int        @id @default(autoincrement())
+  name          String
+  description   String?
+  isActive      Boolean    @default(true)
+  createdAt     DateTime   @default(now())
+  updatedAt     DateTime   @updatedAt
+  userId        Int
+  user          User       @relation("UserContactLists", fields: [userId], references: [id])
+  contacts      Contact[]
+
+  @@map("contact_lists")
+}
+
+model Contact {
+  id            Int        @id @default(autoincrement())
+  phoneNumber   String
+  countryCode   String?    // optional dial code
+  ucs2          Boolean    @default(false) // true when phone contains non‑GSM‑7 characters
+  createdAt     DateTime   @default(now())
+  contactListId Int
+
+  @@map("contacts")
+}
+
+model ContactImport {
+  id            Int        @id @default(autoincrement())
+  createdAt     DateTime   @default(now())
+  contactListId Int
+  contactList   ContactList @relation(fields: [contactListId], references: [id])
+  status        String     @default(PENDING) // PENDING | COMPLETED | FAILED
+  error         String?
+  fileUrl       String?
+  rowCount      Int        @default(0)
+  processed     Int        @default(0)
+
+  @@map("contact_imports")
 }
 
 enum CampaignStatus {

@@ -62,8 +62,28 @@ What the generic pipe has that the vertical wrapper still lacks. Our edge stays 
 - [ ] **Instant OTP path** — dedicated high-priority transactional route with delivery confirmation, separate from bulk promo queue
 - [x] **Real-time delivery reports + analytics** — `GET /api/sms/admin/campaigns/:id/analytics` (rates, hourly/daily buckets, top fail reasons); admin detail shows rate cards + lazy area chart + fail list — verified live on seed (67% sent)
 - [ ] **Multiple sender IDs** — branded sender management per client instead of a single pipe identity
-- [ ] **Contact management** — saved lists, bulk import history, and segmentation instead of one-shot CSV uploads
+- [x] **Contact management** — saved lists, import history, and segmentation (GSM‑7/UCS‑2 aware) for targeted sends. *(Prisma models ContactList, Contact, ContactImport added; DTOs & admin endpoints implemented)*
+- [x] **Scheduled campaigns** – `send_at` field + scheduling endpoint (`PATCH /api/sms/admin/campaigns/:id/schedule`); BullMQ delayed jobs to be added later.
 - [ ] **Promotional vs transactional routing** — message-type separation (promo windows, transactional priority)
 - [ ] **Two-way messaging** — inbound replies / conversation view per campaign
 - [ ] **Client onboarding flow** — register → KYC documents → approval, mirroring Nepal's compliance expectations
 - [ ] **Billing tiers + wallet top-up** — volume tiers and eSewa top-up; no monetization exists today
+
+### Nest SMS Gap Analysis (future)
+**High priority (must‑have to compete on feature parity)**
+- [ ] **Developer SMS Gateway API** — public key‑based API with OpenAPI docs; enable OTP/transactional triggers from external systems.
+- [ ] **Instant OTP path** – separate high‑priority transactional queue with delivery receipts, distinct from bulk promotional flow.
+- [ ] **Multiple sender IDs** – per‑client branded sender names/prefixes, managed via admin UI.
+- [x] **Contact management** – saved lists, import history, and segmentation (GSM‑7/UCS‑2 aware) for targeted sends. *(Prisma models ContactList, Contact, ContactImport added; DTOs & admin endpoints implemented)*
+- [x] **Scheduled campaigns** – `send_at` field + scheduling endpoint (`PATCH /api/sms/admin/campaigns/:id/schedule`); BullMQ delayed jobs to be added later.
+- [ ] **Billing tiers + wallet top‑up** – volume‑based pricing tiers (Bronze/Silver/Gold/Diamond) and eSewa/top‑up integration.
+
+**Medium priority (valuable differentiators)**
+- [x] **Advanced analytics** – engagement rates, opt‑out tracking, per‑campaign cost estimator (segments × rows × rate). **Implemented** (new `GET /api/sms/admin/campaigns/:id/advanced-analytics` endpoint, OptOut model, cost estimate, engagement metrics).
+- [x] **Real‑time delivery reports** – WebSocket / polling endpoint for live status updates on campaign detail page. **Added** (`WS gateway at ws/campaigns`, event emission from processor, polling endpoint `GET /api/sms/admin/campaigns/:id/status`).
+- [ ] **Promotional vs transactional routing** – message‑type flag that routes through appropriate queue/rate‑limit.
+- [ ] **Two‑way messaging** – inbound reply storage, conversation view per campaign, keyword auto‑responders.
+
+**Lower priority (nice‑to‑have)**
+- [ ] **Client onboarding flow** – full register → KYC → approval journey (can be deferred if external identity provider used).
+- [ ] **Pricing tier display** – public pricing pages; internal billing can follow later.

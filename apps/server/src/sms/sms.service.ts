@@ -10,13 +10,21 @@ import {
 } from "@nestjs/common";
 import { Queue } from "bullmq";
 import { parse } from "csv-parse/sync";
+import { Subject as RxSubject } from "rxjs";
 import { v4 as uuidv4 } from "uuid";
 import { PrismaService } from "@/prisma/prisma.service";
-import { CampaignAnalyticsQueryDto, CampaignListQueryDto, TemplateListQueryDto } from "./dto/sms-query.dto";
+import {
+  AdvancedAnalyticsQueryDto,
+  CampaignAnalyticsQueryDto,
+  CampaignListQueryDto,
+  ScheduleCampaignDto,
+  TemplateListQueryDto,
+} from "./dto/sms-query.dto";
 
 @Injectable()
 export class SmsService {
   private readonly logger = new Logger(SmsService.name);
+  private jobEventSubject = new RxSubject<{campaignId: number, jobId: number, status: string}>();
   private s3Client: S3Client;
   private bucketName = process.env.AWS_S3_BUCKET || "test-bucket";
 
@@ -343,6 +351,74 @@ export class SmsService {
         failed: Number(b.failed),
       })),
       topErrors: topErrors.map((e) => ({ error: e.error, count: e._count.error })),
+    };
+
+  async scheduleCampaign(id: number, body: ScheduleCampaignDto) 
+    return this.prisma.campaign.update({
+      where: { id },
+      data: { sendAt: body.sendAt, name: body.name ?? undefined },
+    });
+
+  async getAdvancedAnalytics(
+    id: number,
+    query: AdvancedAnalyticsQueryDto,
+  ) {
+    const campaign = await this.prisma.campaign.findUnique({
+      where: { id },
+      select: { id: true, totalRows: true, processedRows: true, failedRows: true },
+    });
+    if (!campaign) throw new NotFoundException('Campaign not found');
+
+    const gran = query.granularity === 'day' ? 'day' : 'hour';
+    const buckets = await this.prisma.$queryRaw<
+      { t: Date; sent: number; failed: number }[]
+    >`
+      SELECT date_trunc(${gran}, "createdAt") AS t,
+        COUNT(*) FILTER (WHERE status = 'SENT')::int AS sent,
+        COUNT(*) FILTER (WHERE status = 'FAILED')::int AS failed
+      FROM sms_jobs
+      WHERE "campaignId" = ${id}
+      GROUP BY 1
+      ORDER BY 1
+    `;
+
+    const optOuts = await this.prisma.optOut.count({
+      where: { campaignId: id },
+    });
+
+    // Simple segment & cost estimate:
+    // Assume each SMS is one segment unless UCS-2 (then 70 chars vs 160). We'll estimate
+    // cost per segment as $0.01 (configurable). Total segments ≈ totalRows (one seg per msg).
+    const costPerSegment = 0.01; // $0.01 per SMS segment
+    const estimatedSegments = campaign.totalRows || 0;
+    const costEstimate = Math.round(estimatedSegments * costPerSegment * 100) / 100; // round to cents
+
+    const sent = buckets.reduce((n, b) => n + Number(b.sent), 0);
+    const failed = buckets.reduce((n, b) => n + Number(b.failed), 0);
+    const total = campaign.totalRows || sent + failed;
+
+    return {
+      rates: {
+        total,
+        sent,
+        failed,
+        pending: Math.max(total - sent - failed, 0),
+        sentRate: total ? sent / total : 0,
+        failedRate: total ? failed / total : 0,
+        optOutRate: total ? optOuts / total : 0,
+      },
+      buckets: buckets.map((b) => ({
+        t: b.t,
+        sent: Number(b.sent),
+        failed: Number(b.failed),
+      })),
+      topErrors: topErrors.map((e) => ({ error: e.error, count: e._count.error })),
+      engagement: {
+        sentRate: total ? sent / total : 0,
+        failedRate: total ? failed / total : 0,
+        optOutRate: total ? optOuts / total : 0,
+      },
+      costEstimate,
     };
   }
 

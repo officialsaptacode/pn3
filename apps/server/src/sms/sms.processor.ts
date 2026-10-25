@@ -1,6 +1,7 @@
 import { Processor, WorkerHost } from "@nestjs/bullmq";
-import { Injectable, Logger } from "@nestjs/common";
+import { Injectable, Logger, Inject } from "@nestjs/common";
 import { ConfigService } from "@nestjs/config";
+import { SmsService } from "@/sms/sms.service";
 import { Job } from "bullmq";
 import { PrismaService } from "@/prisma/prisma.service";
 
@@ -18,6 +19,7 @@ export class SmsProcessor extends WorkerHost {
   constructor(
     private prisma: PrismaService,
     private configService: ConfigService,
+    @Inject() private smsService: SmsService,
   ) {
     super();
   }
@@ -64,6 +66,8 @@ export class SmsProcessor extends WorkerHost {
         data: { status: "SENT" },
       });
 
+      this.smsService.jobEventSubject.next({campaignId, jobId, status: "SENT"});
+
       // Increment processedRows
       await this.prisma.campaign.update({
         where: { id: campaignId },
@@ -80,6 +84,8 @@ export class SmsProcessor extends WorkerHost {
           error: message,
         },
       });
+
+      this.smsService.jobEventSubject.next({campaignId, jobId, status: "FAILED"});
 
       await this.prisma.campaign.update({
         where: { id: campaignId },

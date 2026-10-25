@@ -1,8 +1,23 @@
-import { Body, Controller, Get, Param, ParseIntPipe, Post, Query, UseGuards } from "@nestjs/common";
+import {
+  Body,
+  Controller,
+  Get,
+  Param,
+  ParseIntPipe,
+  Patch,
+  Post,
+  Query,
+  UseGuards,
+} from "@nestjs/common";
 import { GetCurrentUserId, Roles } from "@/auth/decorator";
 import { AtGuard, RolesGuard } from "@/auth/guard";
 import { Role } from "@/generated";
-import { CampaignAnalyticsQueryDto, CampaignListQueryDto, TemplateListQueryDto } from "./dto/sms-query.dto";
+import {
+  AdvancedAnalyticsQueryDto,
+  CampaignAnalyticsQueryDto,
+  CampaignListQueryDto,
+  TemplateListQueryDto,
+} from "./dto/sms-query.dto";
 import { SmsService } from "./sms.service";
 
 @Controller("sms")
@@ -81,4 +96,27 @@ export class SmsController {
   ) {
     return this.smsService.getCampaignAnalytics(id, query);
   }
+
+  @UseGuards(RolesGuard)
+  @Roles(Role.ADMIN)
+  @Get("admin/campaigns/:id/advanced-analytics")
+  getAdvancedAnalytics(
+    @Param("id", ParseIntPipe) id: number,
+    @Query() query: AdvancedAnalyticsQueryDto,
+  ) {
+    return this.smsService.getAdvancedAnalytics(id, query);
+  }
+}
+
+@UseGuards(RolesGuard)
+  @Roles(Role.ADMIN)
+  @Patch("admin/campaigns/:id/schedule")
+async;
+scheduleCampaign(
+    @Param("id", ParseIntPipe) id: number,
+    @Body() body: ScheduleCampaignDto,
+  )
+{
+  return this.smsService.scheduleCampaign(id, body);
+}
 }

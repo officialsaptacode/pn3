@@ -1,8 +1,10 @@
 import { Module } from '@nestjs/common';
 import { SmsService } from './sms.service';
 import { SmsController } from './sms.controller';
+import { SmsWsGateway } from './ws/gateway';
 import { BullModule } from '@nestjs/bullmq';
 import { SmsProcessor } from './sms.processor';
+import { WebSocketModule } from '@nestjs/websockets';
 
 @Module({
   imports: [
@@ -17,8 +19,9 @@ import { SmsProcessor } from './sms.processor';
         },
       }
     }),
+    WebSocketModule.forRoot({ path: 'ws' }),
   ],
-  providers: [SmsService, SmsProcessor],
+  providers: [SmsService, SmsProcessor, SmsWsGateway],
   controllers: [SmsController]
 })
 export class SmsModule {}
