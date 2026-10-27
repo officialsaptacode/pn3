@@ -2,6 +2,8 @@ import {
   Body,
   Controller,
   Get,
+  HttpCode,
+  HttpStatus,
   Param,
   ParseIntPipe,
   Patch,
@@ -13,11 +15,13 @@ import { GetCurrentUserId, Roles } from "@/auth/decorator";
 import { AtGuard, RolesGuard } from "@/auth/guard";
 import { Role } from "@/generated";
 import {
-  AdvancedAnalyticsQueryDto,
   CampaignAnalyticsQueryDto,
   CampaignListQueryDto,
   TemplateListQueryDto,
 } from "./dto/sms-query.dto";
+import { AdvancedAnalyticsQueryDto } from "./dtos/advanced-analytics.dto";
+import { ScheduleCampaignDto } from "./dtos/schedule-campaign.dto";
+import { UpdateTemplateDto } from "./dtos/update-template.dto";
 import { SmsService } from "./sms.service";
 
 @Controller("sms")
@@ -117,17 +121,34 @@ export class SmsController {
       status: "operational",
     };
   }
-}
 
-@UseGuards(RolesGuard)
+  @UseGuards(RolesGuard)
   @Roles(Role.ADMIN)
   @Patch("admin/campaigns/:id/schedule")
-async;
-scheduleCampaign(
-    @Param("id", ParseIntPipe) id: number,
-    @Body() body: ScheduleCampaignDto,
-  )
-{
-  return this.smsService.scheduleCampaign(id, body);
-}
+  async scheduleCampaign(@Param("id", ParseIntPipe) id: number, @Body() body: ScheduleCampaignDto) {
+    return this.smsService.scheduleCampaign(id, body);
+  }
+
+  @UseGuards(RolesGuard)
+  @Roles(Role.ADMIN)
+  @Patch("admin/templates/:id")
+  async updateTemplate(@Param("id", ParseIntPipe) id: number, @Body() body: UpdateTemplateDto) {
+    return this.smsService.updateTemplate(id, body);
+  }
+
+  @UseGuards(RolesGuard)
+  @Roles(Role.ADMIN)
+  @Post("admin/templates/:id/evaluate")
+  @HttpCode(HttpStatus.OK)
+  async reevaluateTemplate(@Param("id", ParseIntPipe) id: number) {
+    return this.smsService.evaluateTemplate(id);
+  }
+
+  @UseGuards(RolesGuard)
+  @Roles(Role.ADMIN)
+  @Post("admin/campaigns/:id/retry")
+  @HttpCode(HttpStatus.OK)
+  async retryFailedJobs(@Param("id", ParseIntPipe) id: number) {
+    return this.smsService.retryFailedJobs(id);
+  }
 }

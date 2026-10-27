@@ -1,41 +1,41 @@
-import { Inject } from "@nestjs/common";
 import {
   OnGatewayConnection,
   OnGatewayDisconnect,
   SubscribeMessage,
   WebSocketGateway,
 } from "@nestjs/websockets";
-import { Observable } from "rxjs";
-import { filter, map } from "rxjs/operators";
-import { Server, Socket } from "socket.io";
+import { filter, map } from "rxjs";
+import { Socket } from "socket.io";
 import { SmsService } from "../sms.service";
 
-@WebSocketGateway("ws/campaigns", { cors: { origin: "*" } })
+@WebSocketGateway({
+  namespace: "ws/campaigns",
+  cors: { origin: "*" },
+})
 export class SmsWsGateway implements OnGatewayConnection, OnGatewayDisconnect {
   private readonly subscribed = new Map<number, Set<Socket>>();
 
-  constructor(@Inject() private smsService: SmsService) {
-    // subscribe to job events and broadcast to relevant sockets
+  constructor(private smsService: SmsService) {
     this.smsService.jobEvent$
       .pipe(
-        filter((e) => e.status),
+        filter((e) => Boolean(e.status)),
         map((e) => ({ campaignId: e.campaignId, jobId: e.jobId, status: e.status })),
       )
       .subscribe(({ campaignId, status }) => {
         const sockets = this.subscribed.get(campaignId) ?? new Set();
-        sockets.forEach((sock) => sock.emit("job-status", { campaignId, status }));
+        sockets.forEach((sock) => {
+          sock.emit("job-status", { campaignId, status });
+        });
       });
   }
 
-  handleConnection(client: Socket) {
-    // no automatic subscription; client must emit 'subscribe' with campaignId
+  handleConnection(_client: Socket) {
+    return;
   }
 
   handleDisconnect(client: Socket) {
-    // remove client from any subscriptions
-    for (const [campaignId, sockets] of this.subscribed.entries()) {
+    for (const [, sockets] of this.subscribed.entries()) {
       sockets.delete(client);
-      if (sockets.size === 0) this.subscribed.delete(campaignId);
     }
   }
 

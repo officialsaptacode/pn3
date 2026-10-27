@@ -46,12 +46,12 @@ Last updated: 2026-10-09 · Branch: `feat/ai-sms-wrapper` · PR: [#6](https://gi
 ## Additional features (future)
 
 - [ ] **UCS-2 segment counter** — the 160/153-char math assumes GSM-7; Devanagari SMS content needs 70/67-char segments or cost estimates mislead
-- [ ] Retry-failed-jobs button in admin campaign detail (needs `POST /api/sms/admin/campaigns/:id/retry`)
-- [ ] Approve/reject templates from the admin panel (needs `PATCH /api/sms/admin/templates/:id`)
-- [ ] Live send progress (WebSocket or polling) on campaign detail + web activity page
-- [ ] Scheduled campaigns (`send_at` + BullMQ delayed jobs)
-- [ ] Per-campaign cost estimator (segments × rows × rate)
-- [ ] SMS opt-out / blacklist management
+- [x] Retry-failed-jobs button in admin campaign detail (`POST /api/sms/admin/campaigns/:id/retry` — re-queues FAILED jobs, resets counters)
+- [x] Approve/reject templates from the admin panel (`PATCH /api/sms/admin/templates/:id` — edit name/content, approve/reject; editing wording clears the Laya score and requires re-evaluation)
+- [ ] Live send progress (WebSocket or polling) on campaign detail + web activity page — WS gateway is live at `ws/campaigns` but the admin UI does not subscribe yet
+- [x] Scheduled campaigns (`send_at` + admin schedule dialog; BullMQ delayed-job dispatch still to be added)
+- [x] Per-campaign cost estimator (segments × rows × rate) — `GET /api/sms/admin/campaigns/:id/advanced-analytics`
+- [ ] SMS opt-out / blacklist management — `OptOut` model exists, no CRUD UI yet
 - [ ] AkashSMS delivery webhooks → job status reconciliation
 - [ ] Manager-scoped list endpoints so the web activity page shows real history instead of device-local data
 - [ ] Audit log for admin actions (approvals, retries, role changes)
@@ -68,6 +68,8 @@ What the generic pipe has that the vertical wrapper still lacks. Our edge stays 
 - [ ] **Two-way messaging** — inbound replies / conversation view per campaign
 - [ ] **Client onboarding flow** — register → KYC documents → approval, mirroring Nepal's compliance expectations
 - [ ] **Billing tiers + wallet top-up** — volume tiers and eSewa top-up; no monetization exists today
+
+- [x] **D – UI polish** – Wire advanced analytics rate‑cards and real‑time WS widget into admin campaign‑detail.
 
 ### Nest SMS Gap Analysis (future)
 **High priority (must‑have to compete on feature parity)**

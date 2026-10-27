@@ -59,14 +59,22 @@ async function main() {
 
   const campaign = await prisma.campaign.upsert({
     where: { id: 1 },
-    update: {},
+    update: {
+      name: "October Overdue Campaign",
+      status: "SENDING",
+      templateId: template.id,
+      totalRows: 3,
+      processedRows: 2,
+      failedRows: 1,
+      sendAt: null,
+    },
     create: {
       name: "October Overdue Campaign",
       status: "SENDING",
       templateId: template.id,
       userId: manager.id,
       totalRows: 3,
-      processedRows: 3,
+      processedRows: 2,
       failedRows: 1,
     },
   });

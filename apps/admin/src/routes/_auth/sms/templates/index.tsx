@@ -6,6 +6,7 @@ import { useState } from "react";
 import { DataTable } from "@/components/data-table";
 import { SearchFilter } from "@/components/search-filter";
 import { StatusBadge } from "@/components/status-badge";
+import { TemplateRowActions } from "./-components/template-row-actions";
 
 export const Route = createFileRoute("/_auth/sms/templates/")({
   component: SmsTemplatesPage,
@@ -68,6 +69,11 @@ function SmsTemplatesPage() {
       cell: ({ row }: any) => (
         <StatusBadge status={approvalLabel(row.original.isApproved, row.original.layaScore)} />
       ),
+    },
+    {
+      id: "actions",
+      header: "Actions",
+      cell: ({ row }: any) => <TemplateRowActions template={row.original} />,
     },
   ];
 

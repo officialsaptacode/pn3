@@ -6,6 +6,7 @@ import { format } from "date-fns";
 import { lazy, Suspense, useState } from "react";
 import { DataTable } from "@/components/data-table";
 import { StatusBadge } from "@/components/status-badge";
+import { CampaignActions } from "./-components/campaign-actions";
 
 // recharts rides in its own chunk — the detail page stays light without it.
 const DeliveryChart = lazy(() =>
@@ -65,8 +66,16 @@ function SmsCampaignDetailPage() {
   return (
     <div className="flex-1 space-y-4 p-8 pt-6">
       <div className="flex items-center justify-between space-y-2">
-        <h2 className="text-3xl font-bold tracking-tight">Campaign #{campaign.id}</h2>
-        <StatusBadge status={campaign.status} />
+        <div className="flex items-center gap-3">
+          <h2 className="text-3xl font-bold tracking-tight">Campaign #{campaign.id}</h2>
+          <StatusBadge status={campaign.status} />
+        </div>
+        <CampaignActions
+          campaignId={campaign.id}
+          campaignName={campaign.name}
+          sendAt={campaign.sendAt ?? null}
+          failedCount={campaign.failedRows}
+        />
       </div>
 
       <div className="grid gap-4 md:grid-cols-3">

@@ -8,51 +8,51 @@ datasource db {
 }
 
 model User {
-  id        Int        @id @default(autoincrement())
-  createdAt DateTime   @default(now())
-  updatedAt DateTime   @updatedAt
-  email     String     @unique
-  userName  String     @unique
-  hash      String
-  role      Role       @default(USER)
-  hashedRt  String?
-  avatarId  Int?
-  avatar    Media?     @relation("UserAvatar", fields: [avatarId], references: [id])
-  media     Media[]    @relation("UserMedia")
-
+  id           Int           @id @default(autoincrement())
+  createdAt    DateTime      @default(now())
+  updatedAt    DateTime      @updatedAt
+  email        String        @unique
+  userName     String        @unique
+  hash         String
+  role         Role          @default(USER)
+  hashedRt     String?
+  avatarId     Int?
+  campaigns    Campaign[]
+  contactLists ContactList[] @relation("UserContactLists")
+  media        Media[]       @relation("UserMedia")
   smsTemplates SmsTemplate[]
-  campaigns Campaign[]
+  avatar       Media?        @relation("UserAvatar", fields: [avatarId], references: [id])
 
   @@map("users")
 }
 
 model Media {
-  id               Int                @id @default(autoincrement())
-  createdAt        DateTime           @default(now())
-  updatedAt        DateTime           @updatedAt
-  type             MediaType
-  url              String
-  filename         String             @default("unknown")
-  mimeType         String             @default("application/octet-stream")
-  size             Int                @default(0)
-  width            Int?
-  height           Int?
-  thumbnailUrl     String?
-  caption          String?
-  altText          String?
-  folder           String?
-  s3Key            String             @default("")
-  s3Bucket         String             @default("")
-  displayOrder     Int                @default(0)
-  uploadedBy       Int?
-  user             User?              @relation("UserMedia", fields: [uploadedBy], references: [id])
-  userAvatars      User[]             @relation("UserAvatar")
-
-  campaigns        Campaign[]
+  id           Int        @id @default(autoincrement())
+  createdAt    DateTime   @default(now())
+  updatedAt    DateTime   @updatedAt
+  type         MediaType
+  url          String
+  filename     String     @default("unknown")
+  mimeType     String     @default("application/octet-stream")
+  size         Int        @default(0)
+  width        Int?
+  height       Int?
+  thumbnailUrl String?
+  caption      String?
+  altText      String?
+  folder       String?
+  s3Key        String     @default("")
+  s3Bucket     String     @default("")
+  displayOrder Int        @default(0)
+  uploadedBy   Int?
+  campaigns    Campaign[]
+  user         User?      @relation("UserMedia", fields: [uploadedBy], references: [id])
+  userAvatars  User[]     @relation("UserAvatar")
 
   @@index([folder])
   @@index([type])
   @@index([createdAt])
+  @@index([uploadedBy])
   @@map("media")
 }
 
@@ -75,120 +75,131 @@ model Subscriber {
   @@map("subscribers")
 }
 
+model SmsTemplate {
+  id         Int        @id @default(autoincrement())
+  createdAt  DateTime   @default(now())
+  updatedAt  DateTime   @updatedAt
+  name       String
+  content    String
+  layaScore  Float?
+  isApproved Boolean    @default(false)
+  userId     Int
+  campaigns  Campaign[]
+  user       User       @relation(fields: [userId], references: [id])
+
+  @@index([userId])
+  @@map("sms_templates")
+}
+
+model Campaign {
+  id            Int            @id @default(autoincrement())
+  createdAt     DateTime       @default(now())
+  updatedAt     DateTime       @updatedAt
+  name          String
+  status        CampaignStatus @default(DRAFT)
+  templateId    Int
+  csvMediaId    Int?
+  userId        Int
+  totalRows     Int            @default(0)
+  processedRows Int            @default(0)
+  failedRows    Int            @default(0)
+  sendAt        DateTime?
+  csvMedia      Media?         @relation(fields: [csvMediaId], references: [id])
+  template      SmsTemplate    @relation(fields: [templateId], references: [id])
+  user          User           @relation(fields: [userId], references: [id])
+  optOuts       OptOut[]
+  smsJobs       SmsJob[]
+
+  @@index([csvMediaId])
+  @@index([status, sendAt])
+  @@index([templateId])
+  @@index([userId, status])
+  @@map("campaigns")
+}
+
+model SmsJob {
+  id                BigInt       @id @default(autoincrement())
+  createdAt         DateTime     @default(now())
+  updatedAt         DateTime     @updatedAt
+  campaignId        Int
+  phoneNumber       String       @db.VarChar(20)
+  payload           Json
+  status            SmsJobStatus @default(PENDING)
+  attempts          Int          @default(0)
+  providerMessageId String?
+  sentAt            DateTime?
+  error             String?
+  campaign          Campaign     @relation(fields: [campaignId], references: [id], onDelete: Cascade)
+
+  @@index([campaignId, status])
+  @@index([providerMessageId])
+  @@map("sms_jobs")
+}
+
+model OptOut {
+  id          Int       @id @default(autoincrement())
+  createdAt   DateTime  @default(now())
+  phoneNumber String    @db.VarChar(20)
+  campaignId  Int?
+  campaign    Campaign? @relation(fields: [campaignId], references: [id], onDelete: Cascade)
+
+  @@unique([phoneNumber, campaignId])
+  @@index([phoneNumber])
+  @@map("opt_outs")
+}
+
+model ContactList {
+  id          Int             @id @default(autoincrement())
+  name        String
+  description String?
+  isActive    Boolean         @default(true)
+  createdAt   DateTime        @default(now())
+  updatedAt   DateTime        @updatedAt
+  userId      Int
+  imports     ContactImport[]
+  user        User            @relation("UserContactLists", fields: [userId], references: [id], onDelete: Cascade)
+  contacts    Contact[]
+
+  @@index([userId])
+  @@map("contact_lists")
+}
+
+model Contact {
+  id            Int         @id @default(autoincrement())
+  phoneNumber   String      @db.VarChar(20)
+  countryCode   String?
+  createdAt     DateTime    @default(now())
+  contactListId Int
+  contactList   ContactList @relation(fields: [contactListId], references: [id], onDelete: Cascade)
+
+  @@unique([contactListId, phoneNumber])
+  @@map("contacts")
+}
+
+model ContactImport {
+  id            Int          @id @default(autoincrement())
+  createdAt     DateTime     @default(now())
+  contactListId Int
+  status        ImportStatus @default(PENDING)
+  error         String?
+  fileUrl       String?
+  rowCount      Int          @default(0)
+  processed     Int          @default(0)
+  contactList   ContactList  @relation(fields: [contactListId], references: [id], onDelete: Cascade)
+
+  @@index([contactListId])
+  @@map("contact_imports")
+}
+
 enum Role {
   ADMIN
   EDITOR
   USER
 }
 
-enum Status {
-  ARCHIVE
-  ACTIVE
-  INACTIVE
-}
-
 enum MediaType {
   IMAGE
   VIDEO
-}
-
-model SmsTemplate {
-  id          Int        @id @default(autoincrement())
-  createdAt   DateTime   @default(now())
-  updatedAt   DateTime   @updatedAt
-  name        String
-  content     String
-  layaScore   Float?     // System 1 Spam probability score
-  isApproved  Boolean    @default(false)
-  userId      Int
-  user        User       @relation(fields: [userId], references: [id])
-  campaigns   Campaign[]
-
-  @@map("sms_templates")
-}
-
-model Campaign {
-  id             Int        @id @default(autoincrement())
-  createdAt      DateTime   @default(now())
-  updatedAt      DateTime   @updatedAt
-  name           String
-  status         CampaignStatus @default(DRAFT)
-  templateId     Int
-  template       SmsTemplate @relation(fields: [templateId], references: [id])
-  csvMediaId     Int?       // The uploaded CSV via Presigned URL
-  csvMedia       Media?     @relation(fields: [csvMediaId], references: [id])
-  userId         Int
-  user           User       @relation(fields: [userId], references: [id])
-  totalRows      Int        @default(0)
-  processedRows  Int        @default(0)
-  failedRows     Int        @default(0)
-  smsJobs        SmsJob[]
-  sendAt         DateTime?  // scheduled send time (UTC)
-
-  @@map("campaigns")
-}
-
-model SmsJob {
-  id           Int        @id @default(autoincrement())
-  createdAt    DateTime   @default(now())
-  updatedAt    DateTime   @updatedAt
-  campaignId   Int
-  campaign     Campaign   @relation(fields: [campaignId], references: [id])
-  phoneNumber  String
-  payload      Json       // The interpolated template or just the data used to map it
-  status       SmsJobStatus @default(PENDING)
-  error        String?
-
-  @@index([campaignId])
-  @@map("sms_jobs")
-}
-
-model OptOut {
-  id          Int        @id @default(autoincrement())
-  createdAt   DateTime   @default(now())
-  phoneNumber String
-  campaignId  Int?       // nullable – opt‑out may be global or campaign‑specific
-  campaign    Campaign?  @relation(fields: [campaignId], references: [id])
-  @@map("opt_outs")
-}
-
-model ContactList {
-  id            Int        @id @default(autoincrement())
-  name          String
-  description   String?
-  isActive      Boolean    @default(true)
-  createdAt     DateTime   @default(now())
-  updatedAt     DateTime   @updatedAt
-  userId        Int
-  user          User       @relation("UserContactLists", fields: [userId], references: [id])
-  contacts      Contact[]
-
-  @@map("contact_lists")
-}
-
-model Contact {
-  id            Int        @id @default(autoincrement())
-  phoneNumber   String
-  countryCode   String?    // optional dial code
-  ucs2          Boolean    @default(false) // true when phone contains non‑GSM‑7 characters
-  createdAt     DateTime   @default(now())
-  contactListId Int
-
-  @@map("contacts")
-}
-
-model ContactImport {
-  id            Int        @id @default(autoincrement())
-  createdAt     DateTime   @default(now())
-  contactListId Int
-  contactList   ContactList @relation(fields: [contactListId], references: [id])
-  status        String     @default(PENDING) // PENDING | COMPLETED | FAILED
-  error         String?
-  fileUrl       String?
-  rowCount      Int        @default(0)
-  processed     Int        @default(0)
-
-  @@map("contact_imports")
 }
 
 enum CampaignStatus {
@@ -202,5 +213,11 @@ enum CampaignStatus {
 enum SmsJobStatus {
   PENDING
   SENT
+  FAILED
+}
+
+enum ImportStatus {
+  PENDING
+  COMPLETED
   FAILED
 }

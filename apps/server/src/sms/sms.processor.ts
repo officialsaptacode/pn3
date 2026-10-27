@@ -1,9 +1,9 @@
 import { Processor, WorkerHost } from "@nestjs/bullmq";
-import { Injectable, Logger, Inject } from "@nestjs/common";
+import { Injectable, Logger } from "@nestjs/common";
 import { ConfigService } from "@nestjs/config";
-import { SmsService } from "@/sms/sms.service";
 import { Job } from "bullmq";
 import { PrismaService } from "@/prisma/prisma.service";
+import { SmsService } from "@/sms/sms.service";
 
 @Processor("sms-queue", {
   concurrency: 5,
@@ -19,18 +19,21 @@ export class SmsProcessor extends WorkerHost {
   constructor(
     private prisma: PrismaService,
     private configService: ConfigService,
-    @Inject() private smsService: SmsService,
+    private smsService: SmsService,
   ) {
     super();
   }
 
   async process(job: Job<any, any, string>): Promise<any> {
     const { campaignId, jobId, phoneNumber, payload } = job.data;
+    // sms_jobs.id is BIGINT; the queue payload carries it as a number.
+    const jobRecordId = BigInt(jobId);
 
     this.logger.debug(`Processing SMS Job ${jobId} for +${phoneNumber}`);
 
     try {
       const isDryRun = this.configService.get("DRY_RUN") === "true";
+      let providerMessageId: string | undefined;
 
       if (isDryRun) {
         this.logger.log(`[DRY RUN] Would send SMS to ${phoneNumber}: ${payload.message}`);
@@ -59,40 +62,63 @@ export class SmsProcessor extends WorkerHost {
           const errData = await response.text();
           throw new Error(`AkashSMS API Error: ${response.status} - ${errData}`);
         }
+
+        try {
+          const ack = await response.json();
+          providerMessageId = ack?.data?.message_id ?? ack?.message_id ?? undefined;
+        } catch {
+          providerMessageId = undefined;
+        }
       }
 
       await this.prisma.smsJob.update({
-        where: { id: jobId },
-        data: { status: "SENT" },
+        where: { id: jobRecordId },
+        data: {
+          status: "SENT",
+          sentAt: new Date(),
+          attempts: { increment: 1 },
+          ...(providerMessageId ? { providerMessageId } : {}),
+        },
       });
 
-      this.smsService.jobEventSubject.next({campaignId, jobId, status: "SENT"});
+      this.smsService.emitJobEvent({ campaignId, jobId, status: "SENT" });
 
-      // Increment processedRows
-      await this.prisma.campaign.update({
-        where: { id: campaignId },
-        data: { processedRows: { increment: 1 } },
-      });
+      await this.syncCampaignCounters(campaignId);
     } catch (error) {
       const message = error instanceof Error ? error.message : String(error);
       this.logger.error(`Failed to send SMS to ${phoneNumber}: ${message}`);
 
       await this.prisma.smsJob.update({
-        where: { id: jobId },
+        where: { id: jobRecordId },
         data: {
           status: "FAILED",
           error: message,
+          attempts: { increment: 1 },
         },
       });
 
-      this.smsService.jobEventSubject.next({campaignId, jobId, status: "FAILED"});
+      this.smsService.emitJobEvent({ campaignId, jobId, status: "FAILED" });
 
-      await this.prisma.campaign.update({
-        where: { id: campaignId },
-        data: { failedRows: { increment: 1 } },
-      });
+      await this.syncCampaignCounters(campaignId);
 
       throw error; // Let BullMQ handle retry based on backoff
     }
+  }
+
+  // Counters are derived from the job rows so retries and BullMQ backoff never double-count.
+  private async syncCampaignCounters(campaignId: number) {
+    await this.prisma.$executeRaw`
+      UPDATE campaigns
+      SET "processedRows" = (
+            SELECT COUNT(*)::int FROM sms_jobs
+            WHERE "campaignId" = campaigns.id AND status = 'SENT'
+          ),
+          "failedRows" = (
+            SELECT COUNT(*)::int FROM sms_jobs
+            WHERE "campaignId" = campaigns.id AND status = 'FAILED'
+          ),
+          "updatedAt" = NOW()
+      WHERE id = ${campaignId}
+    `;
   }
 }

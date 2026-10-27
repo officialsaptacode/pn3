@@ -14,17 +14,23 @@ import { Subject as RxSubject } from "rxjs";
 import { v4 as uuidv4 } from "uuid";
 import { PrismaService } from "@/prisma/prisma.service";
 import {
-  AdvancedAnalyticsQueryDto,
   CampaignAnalyticsQueryDto,
   CampaignListQueryDto,
-  ScheduleCampaignDto,
   TemplateListQueryDto,
 } from "./dto/sms-query.dto";
+import { AdvancedAnalyticsQueryDto } from "./dtos/advanced-analytics.dto";
+import { ScheduleCampaignDto } from "./dtos/schedule-campaign.dto";
+import { UpdateTemplateDto } from "./dtos/update-template.dto";
 
 @Injectable()
 export class SmsService {
   private readonly logger = new Logger(SmsService.name);
-  private jobEventSubject = new RxSubject<{campaignId: number, jobId: number, status: string}>();
+  private readonly jobEventSubject = new RxSubject<{
+    campaignId: number;
+    jobId: number;
+    status: string;
+  }>();
+  readonly jobEvent$ = this.jobEventSubject.asObservable();
   private s3Client: S3Client;
   private bucketName = process.env.AWS_S3_BUCKET || "test-bucket";
 
@@ -39,6 +45,10 @@ export class SmsService {
         secretAccessKey: process.env.AWS_SECRET_ACCESS_KEY || "test",
       },
     });
+  }
+
+  emitJobEvent(event: { campaignId: number; jobId: number; status: string }) {
+    this.jobEventSubject.next(event);
   }
 
   async generatePresignedUrl(filename: string, contentType: string) {
@@ -218,7 +228,7 @@ export class SmsService {
 
       await this.smsQueue.add("send-sms", {
         campaignId,
-        jobId: smsJob.id,
+        jobId: Number(smsJob.id),
         phoneNumber: smsJob.phoneNumber,
         payload: { message },
       });
@@ -231,6 +241,64 @@ export class SmsService {
   }
 
   // ── Admin reads (staff oversight; guarded by RolesGuard ADMIN) ──
+
+  async updateTemplate(id: number, body: UpdateTemplateDto) {
+    const existing = await this.prisma.smsTemplate.findUnique({ where: { id } });
+    if (!existing) throw new NotFoundException("Template not found");
+
+    const contentChanged =
+      body.content !== undefined && body.content.trim() !== existing.content.trim();
+
+    // Editing the wording invalidates the Laya compliance score — re-evaluate before use.
+    const resetCompliance = contentChanged && body.isApproved === undefined;
+
+    const template = await this.prisma.smsTemplate.update({
+      where: { id },
+      data: {
+        name: body.name ?? undefined,
+        content: body.content ?? undefined,
+        ...(resetCompliance ? { layaScore: null, isApproved: false } : {}),
+        ...(body.isApproved !== undefined ? { isApproved: body.isApproved } : {}),
+      },
+    });
+
+    return { ...template, complianceInvalidated: resetCompliance };
+  }
+
+  async retryFailedJobs(id: number) {
+    const campaign = await this.prisma.campaign.findUnique({ where: { id } });
+    if (!campaign) throw new NotFoundException("Campaign not found");
+
+    const failed = await this.prisma.smsJob.findMany({
+      where: { campaignId: id, status: "FAILED" },
+      select: { id: true, phoneNumber: true, payload: true },
+    });
+
+    if (failed.length === 0) return { retried: 0 };
+
+    await this.prisma.smsJob.updateMany({
+      where: { campaignId: id, status: "FAILED" },
+      data: { status: "PENDING", error: null },
+    });
+
+    for (const job of failed) {
+      const payload = job.payload as { message?: string } | null;
+      await this.smsQueue.add("send-sms", {
+        campaignId: id,
+        jobId: Number(job.id),
+        phoneNumber: job.phoneNumber,
+        payload: { message: payload?.message ?? "" },
+      });
+    }
+
+    await this.prisma.campaign.update({
+      where: { id },
+      data: { status: "SENDING" },
+    });
+
+    this.logger.log(`Re-queued ${failed.length} failed job(s) for campaign ${id}`);
+    return { retried: failed.length };
+  }
 
   async listTemplates(query: TemplateListQueryDto) {
     const take = Math.min(query.limit ?? 20, 100);
@@ -302,7 +370,9 @@ export class SmsService {
         select: { id: true, phoneNumber: true, error: true, createdAt: true },
       }),
     ]);
-    return { data: campaign, statusBreakdown, failedJobs };
+    // sms_jobs.id is BIGINT — normalise to Number so the response stays JSON-safe.
+    const safeFailedJobs = failedJobs.map((job) => ({ ...job, id: Number(job.id) }));
+    return { data: campaign, statusBreakdown, failedJobs: safeFailedJobs };
   }
 
   async getCampaignAnalytics(id: number, query: CampaignAnalyticsQueryDto) {
@@ -310,13 +380,11 @@ export class SmsService {
       where: { id },
       select: { id: true, totalRows: true, processedRows: true, failedRows: true },
     });
-    if (!campaign) throw new NotFoundException('Campaign not found');
+    if (!campaign) throw new NotFoundException("Campaign not found");
 
     // Whitelisted — never interpolated from raw input.
-    const gran = query.granularity === 'day' ? 'day' : 'hour';
-    const buckets = await this.prisma.$queryRaw<
-      { t: Date; sent: number; failed: number }[]
-    >`
+    const gran = query.granularity === "day" ? "day" : "hour";
+    const buckets = await this.prisma.$queryRaw<{ t: Date; sent: number; failed: number }[]>`
       SELECT date_trunc(${gran}, "createdAt") AS t,
         COUNT(*) FILTER (WHERE status = 'SENT')::int AS sent,
         COUNT(*) FILTER (WHERE status = 'FAILED')::int AS failed
@@ -325,13 +393,7 @@ export class SmsService {
       GROUP BY 1
       ORDER BY 1
     `;
-    const topErrors = await this.prisma.smsJob.groupBy({
-      by: ['error'],
-      where: { campaignId: id, status: 'FAILED', error: { not: null } },
-      _count: { error: true },
-      orderBy: { _count: { error: 'desc' } },
-      take: 5,
-    });
+    const topErrors = await this.getTopErrors(id);
 
     const sent = buckets.reduce((n, b) => n + Number(b.sent), 0);
     const failed = buckets.reduce((n, b) => n + Number(b.failed), 0);
@@ -352,27 +414,37 @@ export class SmsService {
       })),
       topErrors: topErrors.map((e) => ({ error: e.error, count: e._count.error })),
     };
+  }
 
-  async scheduleCampaign(id: number, body: ScheduleCampaignDto) 
+  async scheduleCampaign(id: number, body: ScheduleCampaignDto) {
     return this.prisma.campaign.update({
       where: { id },
-      data: { sendAt: body.sendAt, name: body.name ?? undefined },
+      data: {
+        sendAt: body.sendAt ? new Date(body.sendAt) : undefined,
+        name: body.name ?? undefined,
+      },
     });
+  }
 
-  async getAdvancedAnalytics(
-    id: number,
-    query: AdvancedAnalyticsQueryDto,
-  ) {
+  private async getTopErrors(campaignId: number) {
+    return this.prisma.smsJob.groupBy({
+      by: ["error"],
+      where: { campaignId, status: "FAILED", error: { not: null } },
+      _count: { error: true },
+      orderBy: { _count: { error: "desc" } },
+      take: 5,
+    });
+  }
+
+  async getAdvancedAnalytics(id: number, query: AdvancedAnalyticsQueryDto) {
     const campaign = await this.prisma.campaign.findUnique({
       where: { id },
       select: { id: true, totalRows: true, processedRows: true, failedRows: true },
     });
-    if (!campaign) throw new NotFoundException('Campaign not found');
+    if (!campaign) throw new NotFoundException("Campaign not found");
 
-    const gran = query.granularity === 'day' ? 'day' : 'hour';
-    const buckets = await this.prisma.$queryRaw<
-      { t: Date; sent: number; failed: number }[]
-    >`
+    const gran = query.granularity === "day" ? "day" : "hour";
+    const buckets = await this.prisma.$queryRaw<{ t: Date; sent: number; failed: number }[]>`
       SELECT date_trunc(${gran}, "createdAt") AS t,
         COUNT(*) FILTER (WHERE status = 'SENT')::int AS sent,
         COUNT(*) FILTER (WHERE status = 'FAILED')::int AS failed
@@ -385,6 +457,8 @@ export class SmsService {
     const optOuts = await this.prisma.optOut.count({
       where: { campaignId: id },
     });
+
+    const topErrors = await this.getTopErrors(id);
 
     // Simple segment & cost estimate:
     // Assume each SMS is one segment unless UCS-2 (then 70 chars vs 160). We'll estimate

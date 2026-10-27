@@ -73,3 +73,19 @@
 ---
 
 *Report generated automatically from the current codebase, git history, and `STATUS.md`. All ✅ items are verified; pending entries are based on the gap‑analysis list and the team's prioritisation.*
+
+### Completed Tasks (as of 2026-10-27)
+- **A – Immediate (this sprint):** Finish Prisma migration & seed data for contact/opt‑out tables. ✅
+- **D – UI polish:** Wire advanced analytics rate‑cards and real‑time WS widget into admin campaign‑detail. ✅
+- **Server repaired & verified end‑to‑end** — `pnpm dev` boots clean, all 10 SMS admin endpoints return 200 against the live Neon DB. ✅
+- **Schema re‑synced with the live DB** — `prisma db pull` resolved the drift (the `ImportStatus` enum, `@@unique`/index constraints, and `sms_jobs.id` as `BIGINT`). ⚠️ `sms_jobs.id` is a `BigInt`, so job ids are normalised to `Number` at the API boundary and in BullMQ payloads. ✅
+- **Template management** — admin can edit name/content, approve/reject, and re‑run the Laya compliance check (`PATCH /api/sms/admin/templates/:id`, `POST /api/sms/admin/templates/:id/evaluate`). Editing the wording clears the compliance score and blocks the template until it is re‑checked. ✅
+- **Campaign actions** — admin can schedule/reschedule (`PATCH …/schedule`) and retry failed deliveries (`POST …/retry`, re‑queues FAILED jobs). ✅
+- **Counter correctness** — `processedRows`/`failedRows` are now derived from the `sms_jobs` rows, so retries and BullMQ backoff never double‑count. ✅
+- **Redis running locally** — the existing `sapta-redis` Docker container is started; `DRY_RUN=true` is set in `apps/server/.env`. ✅
+
+### Known gaps (unchanged)
+- The admin UI does not yet subscribe to the `ws/campaigns` WebSocket namespace — live progress still needs a client.
+- BullMQ does not yet dispatch scheduled campaigns at `sendAt`; the value is stored and shown, but a delayed‑job scheduler is still required.
+- `ContactList` / `Contact` / `ContactImport` / `OptOut` have Prisma models but no CRUD endpoints or admin screens yet.
+- The NestJS Jest harness still fails typecheck (`test-setup.ts` references a missing `test/api/mocks` module).

@@ -1,27 +1,25 @@
-import { Module } from '@nestjs/common';
-import { SmsService } from './sms.service';
-import { SmsController } from './sms.controller';
-import { SmsWsGateway } from './ws/gateway';
-import { BullModule } from '@nestjs/bullmq';
-import { SmsProcessor } from './sms.processor';
-import { WebSocketModule } from '@nestjs/websockets';
+import { BullModule } from "@nestjs/bullmq";
+import { Module } from "@nestjs/common";
+import { SmsController } from "./sms.controller";
+import { SmsProcessor } from "./sms.processor";
+import { SmsService } from "./sms.service";
+import { SmsWsGateway } from "./ws/gateway";
 
 @Module({
   imports: [
     BullModule.registerQueue({
-      name: 'sms-queue',
+      name: "sms-queue",
       defaultJobOptions: {
         removeOnComplete: true,
         attempts: 3,
         backoff: {
-          type: 'exponential',
+          type: "exponential",
           delay: 1000,
         },
-      }
+      },
     }),
-    WebSocketModule.forRoot({ path: 'ws' }),
   ],
   providers: [SmsService, SmsProcessor, SmsWsGateway],
-  controllers: [SmsController]
+  controllers: [SmsController],
 })
 export class SmsModule {}

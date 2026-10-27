@@ -43,7 +43,7 @@ export class CampaignListQueryDto extends SmsListQueryDto {
 }
 
 export class CampaignAnalyticsQueryDto {
-  @IsIn(['hour', 'day'])
+  @IsIn(["hour", "day"])
   @IsOptional()
-  granularity?: 'hour' | 'day' = 'hour';
+  granularity?: "hour" | "day" = "hour";
 }

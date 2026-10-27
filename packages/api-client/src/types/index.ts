@@ -562,6 +562,22 @@ export interface SmsTemplateItem {
   _count: { campaigns: number };
 }
 
+// Raw template row as returned by the admin write endpoints (no relations joined).
+export interface SmsTemplateRecord {
+  id: number;
+  createdAt: string;
+  updatedAt: string;
+  name: string;
+  content: string;
+  layaScore: number | null;
+  isApproved: boolean;
+  userId: number;
+}
+
+export interface SmsTemplateUpdateResult extends SmsTemplateRecord {
+  complianceInvalidated: boolean;
+}
+
 export interface SmsCampaignItem {
   id: number;
   name: string;
@@ -569,10 +585,27 @@ export interface SmsCampaignItem {
   totalRows: number;
   processedRows: number;
   failedRows: number;
+  sendAt: string | null;
   createdAt: string;
   template: { id: number; name: string };
   user: SmsTemplateUser;
   _count: { smsJobs: number };
+}
+
+// Raw campaign row as returned by the admin write endpoints (no relations joined).
+export interface SmsCampaignRecord {
+  id: number;
+  createdAt: string;
+  updatedAt: string;
+  name: string;
+  status: string;
+  templateId: number;
+  csvMediaId: number | null;
+  userId: number;
+  totalRows: number;
+  processedRows: number;
+  failedRows: number;
+  sendAt: string | null;
 }
 
 export interface SmsStatusCount {

@@ -1,14 +1,13 @@
-import { Type } from "class-transformer";
-import { IsISO8601, IsOptional, IsString, Min } from "class-validator";
+import { IsISO8601, IsOptional, IsString, MaxLength, MinLength } from "class-validator";
 
 export class ScheduleCampaignDto {
   @IsOptional()
   @IsISO8601()
-  @Type(() => Date)
-  sendAt?: Date;
+  sendAt?: string;
 
   @IsOptional()
   @IsString()
-  @Min(1)
+  @MinLength(1)
+  @MaxLength(120)
   name?: string;
 }

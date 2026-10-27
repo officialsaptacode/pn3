@@ -1,6 +1,5 @@
-import { Type } from "class-transformer";
-import { IsEnum, IsOptional } from "class-validator";
-import { CampaignAnalyticsQueryDto } from "./sms-query.dto";
+import { IsISO8601, IsOptional } from "class-validator";
+import { CampaignAnalyticsQueryDto } from "../dto/sms-query.dto";
 
 export enum EngagementMetric {
   SENT_RATE = "sentRate",
@@ -10,10 +9,10 @@ export enum EngagementMetric {
 
 export class AdvancedAnalyticsQueryDto extends CampaignAnalyticsQueryDto {
   @IsOptional()
-  @Type(() => Date)
-  startDate?: Date;
+  @IsISO8601()
+  startDate?: string;
 
   @IsOptional()
-  @Type(() => Date)
-  endDate?: Date;
+  @IsISO8601()
+  endDate?: string;
 }
