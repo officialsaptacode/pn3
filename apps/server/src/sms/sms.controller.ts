@@ -106,6 +106,17 @@ export class SmsController {
   ) {
     return this.smsService.getAdvancedAnalytics(id, query);
   }
+
+  @UseGuards(RolesGuard)
+  @Roles(Role.ADMIN)
+  @Get("admin/gateway")
+  getGatewayInfo() {
+    return {
+      name: "SmsGateway",
+      docs: "/api-docs",
+      status: "operational",
+    };
+  }
 }
 
 @UseGuards(RolesGuard)
