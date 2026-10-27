@@ -168,7 +168,13 @@ export class SmsService {
     });
   }
 
-  async createCampaign(userId: number, name: string, templateId: number, csvUrl: string) {
+  async createCampaign(
+    userId: number,
+    name: string,
+    templateId: number,
+    csvUrl: string,
+    sendAt?: string | null,
+  ) {
     const template = await this.prisma.smsTemplate.findUnique({ where: { id: templateId } });
     if (!template || !template.isApproved) {
       throw new BadRequestException("Template must be approved before campaign creation");
@@ -184,25 +190,36 @@ export class SmsService {
       throw new InternalServerErrorException("Failed to read or parse the uploaded CSV");
     }
 
+    const scheduledFor = sendAt ? new Date(sendAt) : null;
+
     const campaign = await this.prisma.campaign.create({
       data: {
         name,
         templateId,
         userId,
         status: "DRAFT",
+        sendAt: scheduledFor,
       },
     });
 
     // Queue campaign in background
-    this.queueCampaign(campaign.id, dataRows, template.content).catch((e) => {
+    this.queueCampaign(campaign.id, dataRows, template.content, scheduledFor).catch((e) => {
       this.logger.error(`Error queueing campaign ${campaign.id}: ${e.message}`);
     });
 
     return campaign;
   }
 
-  async queueCampaign(campaignId: number, dataRows: any[], templateStr: string) {
+  async queueCampaign(
+    campaignId: number,
+    dataRows: any[],
+    templateStr: string,
+    sendAt?: Date | null,
+  ) {
     this.logger.log(`Queueing campaign ${campaignId} with ${dataRows.length} rows`);
+
+    // A future sendAt means BullMQ holds the jobs until then instead of sending now.
+    const delay = sendAt ? Math.max(0, sendAt.getTime() - Date.now()) : 0;
 
     await this.prisma.campaign.update({
       where: { id: campaignId },
@@ -226,17 +243,22 @@ export class SmsService {
         },
       });
 
-      await this.smsQueue.add("send-sms", {
-        campaignId,
-        jobId: Number(smsJob.id),
-        phoneNumber: smsJob.phoneNumber,
-        payload: { message },
-      });
+      // Deterministic BullMQ job id so a schedule change can remove and re-add it.
+      await this.smsQueue.add(
+        "send-sms",
+        {
+          campaignId,
+          jobId: Number(smsJob.id),
+          phoneNumber: smsJob.phoneNumber,
+          payload: { message },
+        },
+        { delay, jobId: `sms-${smsJob.id}` },
+      );
     }
 
     await this.prisma.campaign.update({
       where: { id: campaignId },
-      data: { status: "SENDING" },
+      data: { status: delay > 0 ? "SCHEDULED" : "SENDING" },
     });
   }
 
@@ -417,11 +439,52 @@ export class SmsService {
   }
 
   async scheduleCampaign(id: number, body: ScheduleCampaignDto) {
+    const campaign = await this.prisma.campaign.findUnique({
+      where: { id },
+      select: { id: true, name: true },
+    });
+    if (!campaign) throw new NotFoundException("Campaign not found");
+
+    const alreadySent = await this.prisma.smsJob.count({
+      where: { campaignId: id, status: "SENT" },
+    });
+    if (alreadySent > 0) {
+      throw new BadRequestException(
+        "Campaign has already started sending and can no longer be rescheduled",
+      );
+    }
+
+    // No sendAt means "send now": re-queue the pending jobs without a delay.
+    const sendAt = body.sendAt ? new Date(body.sendAt) : null;
+    const delay = sendAt ? Math.max(0, sendAt.getTime() - Date.now()) : 0;
+
+    const pending = await this.prisma.smsJob.findMany({
+      where: { campaignId: id, status: "PENDING" },
+      select: { id: true, phoneNumber: true, payload: true },
+    });
+
+    for (const job of pending) {
+      const queueJobId = `sms-${job.id}`;
+      // Removing a job that is already being processed throws; the re-add is then a no-op.
+      await this.smsQueue.remove(queueJobId).catch(() => undefined);
+      await this.smsQueue.add(
+        "send-sms",
+        {
+          campaignId: id,
+          jobId: Number(job.id),
+          phoneNumber: job.phoneNumber,
+          payload: job.payload,
+        },
+        { delay, jobId: queueJobId },
+      );
+    }
+
     return this.prisma.campaign.update({
       where: { id },
       data: {
-        sendAt: body.sendAt ? new Date(body.sendAt) : undefined,
+        sendAt,
         name: body.name ?? undefined,
+        status: delay > 0 ? "SCHEDULED" : "SENDING",
       },
     });
   }

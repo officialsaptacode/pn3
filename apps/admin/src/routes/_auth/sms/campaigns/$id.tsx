@@ -75,6 +75,7 @@ function SmsCampaignDetailPage() {
           campaignName={campaign.name}
           sendAt={campaign.sendAt ?? null}
           failedCount={campaign.failedRows}
+          status={campaign.status}
         />
       </div>
 

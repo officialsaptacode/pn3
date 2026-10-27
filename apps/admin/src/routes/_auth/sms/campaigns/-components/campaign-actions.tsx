@@ -11,7 +11,7 @@ import {
 } from "@workspace/ui/components/dialog";
 import { Input } from "@workspace/ui/components/input";
 import { Label } from "@workspace/ui/components/label";
-import { CalendarClock, RotateCcw } from "lucide-react";
+import { CalendarClock, Play, RotateCcw } from "lucide-react";
 import { useState } from "react";
 import { toast } from "sonner";
 
@@ -20,6 +20,7 @@ interface CampaignActionsProps {
   campaignName: string;
   sendAt: string | null;
   failedCount: number;
+  status: string;
 }
 
 function toLocalInputValue(iso: string | null): string {
@@ -35,10 +36,12 @@ export function CampaignActions({
   campaignName,
   sendAt,
   failedCount,
+  status,
 }: CampaignActionsProps) {
   const queryClient = useQueryClient();
   const [isScheduleOpen, setIsScheduleOpen] = useState(false);
   const [scheduledFor, setScheduledFor] = useState(toLocalInputValue(sendAt));
+  const isScheduled = status === "SCHEDULED";
 
   const invalidate = () =>
     queryClient
@@ -54,6 +57,15 @@ export function CampaignActions({
       await invalidate();
     },
     onError: (error: Error) => toast.error(error.message || "Failed to schedule campaign"),
+  });
+
+  const sendNowMutation = useMutation({
+    mutationFn: () => smsService.scheduleCampaign(campaignId, { name: campaignName }),
+    onSuccess: async () => {
+      toast.success("Campaign queued for immediate delivery");
+      await invalidate();
+    },
+    onError: (error: Error) => toast.error(error.message || "Failed to send campaign"),
   });
 
   const retryMutation = useMutation({
@@ -84,6 +96,19 @@ export function CampaignActions({
         <CalendarClock className="mr-2 h-4 w-4" />
         {sendAt ? "Reschedule" : "Schedule"}
       </Button>
+
+      {isScheduled && (
+        <Button
+          variant="outline"
+          size="sm"
+          onClick={() => sendNowMutation.mutate()}
+          disabled={sendNowMutation.isPending}
+          title="Send this campaign immediately instead of waiting for its scheduled time"
+        >
+          <Play className={`mr-2 h-4 w-4 ${sendNowMutation.isPending ? "animate-pulse" : ""}`} />
+          Send now
+        </Button>
+      )}
 
       <Button
         variant="outline"

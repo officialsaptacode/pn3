@@ -39,7 +39,7 @@ Last updated: 2026-10-09 · Branch: `feat/ai-sms-wrapper` · PR: [#6](https://gi
 - [x] Untracked scaffolds committed with the batch (`packages/*`, `.env.example` — required for green builds)
 - [ ] Confirm the mystery second database is decommissioned (a `probe@saptasms.com` test row was created in it during diagnostics)
 - [x] Fix `routeTree.gen.ts` CRLF status noise (root `.gitattributes` pins it to LF)
-- [ ] Repair server Jest harness (`test-setup.ts` references nonexistent `test/api/mocks`) and add specs for the new admin reads
+- [ ] Repair server Jest harness (`test-setup.ts` references nonexistent `test/api/mocks`) and add specs for the new admin reads — **done**: harness repaired, 9 suites / 26 tests passing
 - [x] Move web auth token from `localStorage` to httpOnly cookie session (server sets `accessToken` cookie; studio uses sign-in form + profile probe)
 - [x] Admin bundle warning: `React.lazy` split recharts (331 KB) + tiptap (510 KB) on demand; main chunk 1.66 MB → 822 KB
 
@@ -49,7 +49,7 @@ Last updated: 2026-10-09 · Branch: `feat/ai-sms-wrapper` · PR: [#6](https://gi
 - [x] Retry-failed-jobs button in admin campaign detail (`POST /api/sms/admin/campaigns/:id/retry` — re-queues FAILED jobs, resets counters)
 - [x] Approve/reject templates from the admin panel (`PATCH /api/sms/admin/templates/:id` — edit name/content, approve/reject; editing wording clears the Laya score and requires re-evaluation)
 - [ ] Live send progress (WebSocket or polling) on campaign detail + web activity page — WS gateway is live at `ws/campaigns` but the admin UI does not subscribe yet
-- [x] Scheduled campaigns (`send_at` + admin schedule dialog; BullMQ delayed-job dispatch still to be added)
+- [x] Scheduled campaigns (`send_at` + admin schedule dialog + BullMQ delayed-job dispatch; "Send now" button releases a scheduled campaign early)
 - [x] Per-campaign cost estimator (segments × rows × rate) — `GET /api/sms/admin/campaigns/:id/advanced-analytics`
 - [ ] SMS opt-out / blacklist management — `OptOut` model exists, no CRUD UI yet
 - [ ] AkashSMS delivery webhooks → job status reconciliation
@@ -62,8 +62,8 @@ What the generic pipe has that the vertical wrapper still lacks. Our edge stays 
 - [ ] **Instant OTP path** — dedicated high-priority transactional route with delivery confirmation, separate from bulk promo queue
 - [x] **Real-time delivery reports + analytics** — `GET /api/sms/admin/campaigns/:id/analytics` (rates, hourly/daily buckets, top fail reasons); admin detail shows rate cards + lazy area chart + fail list — verified live on seed (67% sent)
 - [ ] **Multiple sender IDs** — branded sender management per client instead of a single pipe identity
-- [x] **Contact management** — saved lists, import history, and segmentation (GSM‑7/UCS‑2 aware) for targeted sends. *(Prisma models ContactList, Contact, ContactImport added; DTOs & admin endpoints implemented)*
-- [x] **Scheduled campaigns** – `send_at` field + scheduling endpoint (`PATCH /api/sms/admin/campaigns/:id/schedule`); BullMQ delayed jobs to be added later.
+- [ ] **Contact management** — saved lists, import history, and segmentation (GSM‑7/UCS‑2 aware) for targeted sends. *(Prisma models `ContactList`, `Contact`, `ContactImport` added; no CRUD endpoints or admin screens yet)*
+- [x] **Scheduled campaigns** – `send_at` field + scheduling endpoint (`PATCH /api/sms/admin/campaigns/:id/schedule`) + BullMQ delayed-job dispatch; campaign status moves `SCHEDULED → SENDING → COMPLETED/FAILED`.
 - [ ] **Promotional vs transactional routing** — message-type separation (promo windows, transactional priority)
 - [ ] **Two-way messaging** — inbound replies / conversation view per campaign
 - [ ] **Client onboarding flow** — register → KYC documents → approval, mirroring Nepal's compliance expectations
@@ -76,13 +76,13 @@ What the generic pipe has that the vertical wrapper still lacks. Our edge stays 
 - [ ] **Developer SMS Gateway API** — public key‑based API with OpenAPI docs; enable OTP/transactional triggers from external systems.
 - [ ] **Instant OTP path** – separate high‑priority transactional queue with delivery receipts, distinct from bulk promotional flow.
 - [ ] **Multiple sender IDs** – per‑client branded sender names/prefixes, managed via admin UI.
-- [x] **Contact management** – saved lists, import history, and segmentation (GSM‑7/UCS‑2 aware) for targeted sends. *(Prisma models ContactList, Contact, ContactImport added; DTOs & admin endpoints implemented)*
-- [x] **Scheduled campaigns** – `send_at` field + scheduling endpoint (`PATCH /api/sms/admin/campaigns/:id/schedule`); BullMQ delayed jobs to be added later.
+- [ ] **Contact management** – saved lists, import history, and segmentation (GSM‑7/UCS‑2 aware) for targeted sends. *(Prisma models `ContactList`, `Contact`, `ContactImport` added; no CRUD endpoints or admin screens yet)*
+- [x] **Scheduled campaigns** – `send_at` field + scheduling endpoint (`PATCH /api/sms/admin/campaigns/:id/schedule`) + BullMQ delayed-job dispatch; campaign status moves `SCHEDULED → SENDING → COMPLETED/FAILED`.
 - [ ] **Billing tiers + wallet top‑up** – volume‑based pricing tiers (Bronze/Silver/Gold/Diamond) and eSewa/top‑up integration.
 
 **Medium priority (valuable differentiators)**
 - [x] **Advanced analytics** – engagement rates, opt‑out tracking, per‑campaign cost estimator (segments × rows × rate). **Implemented** (new `GET /api/sms/admin/campaigns/:id/advanced-analytics` endpoint, OptOut model, cost estimate, engagement metrics).
-- [x] **Real‑time delivery reports** – WebSocket / polling endpoint for live status updates on campaign detail page. **Added** (`WS gateway at ws/campaigns`, event emission from processor, polling endpoint `GET /api/sms/admin/campaigns/:id/status`).
+- [x] **Real‑time delivery reports** – WebSocket gateway (`ws/campaigns`) broadcasts job-status events from the processor; campaign detail page polls `GET /api/sms/admin/campaigns/:id` for refreshed counters. *(No WS client in the admin UI yet, and there is no dedicated `/status` polling endpoint.)*
 - [ ] **Promotional vs transactional routing** – message‑type flag that routes through appropriate queue/rate‑limit.
 - [ ] **Two‑way messaging** – inbound reply storage, conversation view per campaign, keyword auto‑responders.
 

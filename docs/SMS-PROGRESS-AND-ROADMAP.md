@@ -12,14 +12,15 @@
 |------|-------------|
 | **Backend (NestJS + Prisma + BullMQ)** | • Prisma models: `Campaign`, `SmsJob`, `SmsTemplate` with status/counters. <br>• BullMQ queue wired for AkashSMS at max 50 jobs/sec. <br>• `POST /api/sms/templates` – System 2 draft enhancement (`gpt‑4o‑mini`). <br>• `POST /api/sms/templates/:id/evaluate` – System 1 compliance via self‑hosted Laya (`/v1/systemone`), live score 0.238 → Approved. <br>• `POST /api/sms/presigned-url` + `POST /api/sms/campaigns` – browser→S3 CSV upload, queue fan‑out. <br>• Admin reads (`GET /api/sms/admin/overview|templates|campaigns|campaigns/:id`) – ADMIN‑guarded, validated DTOs, paginated. <br>• `prisma/seed.ts` – ADMIN + manager users, 2 templates, 1 campaign with jobs. <br>• httpOnly cookie sessions – server sets `accessToken` cookie on signin/signup/refresh, clears on logout. <br>• Web English‑only – removed `next‑intl`/Nepali stack, all routes prerender static. <br>• Admin bundle 1.66 MB → 822 KB via `React.lazy` for recharts + tiptap; biome 0 errors on touched files. |
 | **Delivery analytics** | • `GET /api/sms/admin/campaigns/:id/analytics` – delivery rates, hourly/daily `date_trunc` buckets, top‑5 fail reasons. <br>• Admin campaign detail: rate cards, lazy Recharts area chart (own chunk), fail‑reason list. <br>• Verified live on seed: 67 % sent, 1 bucket, top error “Invalid phone number format”. |
-| **Contact management** (new) | • Prisma models `ContactList`, `Contact`, `ContactImport` added. <br>• DTO `ScheduleCampaignDto`. <br>• Admin `PATCH /api/sms/admin/campaigns/:id/schedule` endpoint. <br>• `send_at DateTime?` field on `Campaign`. |
-| **Advanced analytics** (new) | • Prisma model `OptOut` added. <br>• DTO `AdvancedAnalyticsQueryDto` (extends `CampaignAnalyticsQueryDto` with `startDate`/`endDate`). <br>• Service method `getAdvancedAnalytics` returning `rates`, `buckets`, `topErrors`, `engagement` (`sentRate`, `failedRate`, `optOutRate`) and `costEstimate` (configurable $0.01 per segment). <br>• Controller endpoint `GET /api/sms/admin/campaigns/:id/advanced-analytics`. |
-| **Real‑time delivery reports** (new) | • `SmsProcessor` emits job‑status events via an `RxSubject` after each SENT/FAILED job. <br>• `SmsWsGateway` (`ws/campaigns`) broadcasts `job-status` to sockets that have emitted `subscribe` with the campaign ID. <br>• Polling fallback `GET /api/sms/admin/campaigns/:id/status` returns the latest job status from the DB. <br>• Gateway registered in `SmsModule` with `WebSocketModule.forRoot({ path: 'ws' })`. |
+| **Contact management** (new) | • Prisma models `ContactList`, `Contact`, `ContactImport` added. <br>• No CRUD endpoints or admin screens yet — models only. |
+| **Advanced analytics** (new) | • Prisma model `OptOut` added. <br>• DTO `AdvancedAnalyticsQueryDto` (extends `CampaignAnalyticsQueryDto` with `startDate`/`endDate`). <br>• Service method `getAdvancedAnalytics` returning `rates`, `buckets`, `topErrors`, `engagement` (`sentRate`, `failedRate`, `optOutRate`) and `costEstimate` (one segment per row at a fixed $0.01). <br>• Controller endpoint `GET /api/sms/admin/campaigns/:id/advanced-analytics`. |
+| **Real‑time delivery reports** (new) | • `SmsProcessor` emits job‑status events via an `RxSubject` after each SENT/FAILED job. <br>• `SmsWsGateway` (`ws/campaigns`) broadcasts `job-status` to sockets that have emitted `subscribe` with the campaign ID. <br>• Gateway registered in `SmsModule`. <br>• No admin client subscribes yet, and there is no dedicated `/status` polling endpoint — the campaign detail page polls `GET /api/sms/admin/campaigns/:id`. |
+| **Scheduled campaigns** | • `sendAt DateTime?` on `Campaign` + `SCHEDULED` campaign status. <br>• `POST /api/sms/campaigns` accepts `sendAt`; `PATCH /api/sms/admin/campaigns/:id/schedule` reschedules or releases a campaign early ("Send now"). <br>• BullMQ holds each job with a `delay` and a deterministic job id (`sms-<jobId>`) so a reschedule can remove and re‑queue it. <br>• Campaign status is derived from the job rows: `SCHEDULED → SENDING → COMPLETED/FAILED`. |
 
 ### Ongoing tasks
-- Prisma migration to create new tables (`opt_outs`, `contact_lists`, `contacts`, `contact_imports`) in the target DB.
 - Seed sample data for opt‑outs and contact lists (optional for immediate feature visibility).
 - Wire the new endpoints into the admin UI (rate‑cards for engagement & cost, optional WS status widget).
+- Build an admin campaign‑create screen (today campaigns are created via `POST /api/sms/campaigns`).
 
 ### Pending / not yet started (as of this report)
 | Priority | Item | Brief description |
@@ -81,11 +82,12 @@
 - **Schema re‑synced with the live DB** — `prisma db pull` resolved the drift (the `ImportStatus` enum, `@@unique`/index constraints, and `sms_jobs.id` as `BIGINT`). ⚠️ `sms_jobs.id` is a `BigInt`, so job ids are normalised to `Number` at the API boundary and in BullMQ payloads. ✅
 - **Template management** — admin can edit name/content, approve/reject, and re‑run the Laya compliance check (`PATCH /api/sms/admin/templates/:id`, `POST /api/sms/admin/templates/:id/evaluate`). Editing the wording clears the compliance score and blocks the template until it is re‑checked. ✅
 - **Campaign actions** — admin can schedule/reschedule (`PATCH …/schedule`) and retry failed deliveries (`POST …/retry`, re‑queues FAILED jobs). ✅
+- **Scheduled campaigns are real** — BullMQ holds each job with a `delay` until `sendAt`; the admin can reschedule or release a campaign early with "Send now". Campaign status is derived from the job rows (`SCHEDULED → SENDING → COMPLETED/FAILED`). Verified live against the Neon DB. ✅
 - **Counter correctness** — `processedRows`/`failedRows` are now derived from the `sms_jobs` rows, so retries and BullMQ backoff never double‑count. ✅
 - **Redis running locally** — the existing `sapta-redis` Docker container is started; `DRY_RUN=true` is set in `apps/server/.env`. ✅
+- **Jest harness repaired** — `test-setup.ts` no longer imports the missing `test/api/mocks`; ESM‑only `@nestjs/bullmq` and `uuid` are mocked. 9 suites / 26 tests passing. ✅
 
 ### Known gaps (unchanged)
 - The admin UI does not yet subscribe to the `ws/campaigns` WebSocket namespace — live progress still needs a client.
-- BullMQ does not yet dispatch scheduled campaigns at `sendAt`; the value is stored and shown, but a delayed‑job scheduler is still required.
 - `ContactList` / `Contact` / `ContactImport` / `OptOut` have Prisma models but no CRUD endpoints or admin screens yet.
-- The NestJS Jest harness still fails typecheck (`test-setup.ts` references a missing `test/api/mocks` module).
+- The admin UI has no campaign‑create screen; campaigns are created through `POST /api/sms/campaigns` (which now accepts `sendAt`).

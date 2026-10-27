@@ -106,6 +106,7 @@ export class SmsProcessor extends WorkerHost {
   }
 
   // Counters are derived from the job rows so retries and BullMQ backoff never double-count.
+  // Status is derived the same way: SCHEDULED -> SENDING -> COMPLETED/FAILED.
   private async syncCampaignCounters(campaignId: number) {
     await this.prisma.$executeRaw`
       UPDATE campaigns
@@ -117,6 +118,17 @@ export class SmsProcessor extends WorkerHost {
             SELECT COUNT(*)::int FROM sms_jobs
             WHERE "campaignId" = campaigns.id AND status = 'FAILED'
           ),
+          status = CASE
+            WHEN EXISTS (
+              SELECT 1 FROM sms_jobs
+              WHERE "campaignId" = campaigns.id AND status = 'PENDING'
+            ) THEN 'SENDING'::"CampaignStatus"
+            WHEN EXISTS (
+              SELECT 1 FROM sms_jobs
+              WHERE "campaignId" = campaigns.id AND status = 'FAILED'
+            ) THEN 'FAILED'::"CampaignStatus"
+            ELSE 'COMPLETED'::"CampaignStatus"
+          END,
           "updatedAt" = NOW()
       WHERE id = ${campaignId}
     `;

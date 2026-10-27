@@ -20,6 +20,7 @@ import {
   TemplateListQueryDto,
 } from "./dto/sms-query.dto";
 import { AdvancedAnalyticsQueryDto } from "./dtos/advanced-analytics.dto";
+import { CreateCampaignDto } from "./dtos/create-campaign.dto";
 import { ScheduleCampaignDto } from "./dtos/schedule-campaign.dto";
 import { UpdateTemplateDto } from "./dtos/update-template.dto";
 import { SmsService } from "./sms.service";
@@ -52,13 +53,14 @@ export class SmsController {
   }
 
   @Post("campaigns")
-  async createCampaign(
-    @GetCurrentUserId() userId: number,
-    @Body("name") name: string,
-    @Body("templateId") templateId: number,
-    @Body("csvUrl") csvUrl: string,
-  ) {
-    return this.smsService.createCampaign(userId, name, templateId, csvUrl);
+  async createCampaign(@GetCurrentUserId() userId: number, @Body() body: CreateCampaignDto) {
+    return this.smsService.createCampaign(
+      userId,
+      body.name,
+      body.templateId,
+      body.csvUrl,
+      body.sendAt,
+    );
   }
 
   // ── Admin reads (class-level AtGuard still applies; RolesGuard is additive) ──

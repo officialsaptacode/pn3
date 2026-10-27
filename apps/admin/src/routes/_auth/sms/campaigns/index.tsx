@@ -86,6 +86,7 @@ function SmsCampaignsPage() {
         filterOptions={[
           { label: "All", value: "ALL" },
           { label: "Queued", value: "QUEUED" },
+          { label: "Scheduled", value: "SCHEDULED" },
           { label: "Sending", value: "SENDING" },
           { label: "Completed", value: "COMPLETED" },
           { label: "Failed", value: "FAILED" },
