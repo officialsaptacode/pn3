@@ -11,10 +11,14 @@ import {
   FormMessage,
 } from "@workspace/ui/components/form";
 import { Input } from "@workspace/ui/components/input";
+import { lazy, Suspense } from "react";
 import { useForm } from "react-hook-form";
 import { toast } from "sonner";
 import * as z from "zod";
-import Tiptap from "@/components/tip-tap";
+
+// tiptap is the heaviest dep on form routes — split it out of the main chunk.
+const Tiptap = lazy(() => import("@/components/tip-tap"));
+
 import { useFormToast } from "@/hooks/use-form-toast";
 
 const authorSchema = z.object({
@@ -190,7 +194,13 @@ export function AuthorForm({ initialData }: AuthorFormProps) {
             <FormItem>
               <FormLabel required>Bio</FormLabel>
               <FormControl>
-                <Tiptap value={field.value} onChange={field.onChange} />
+                <Suspense
+                  fallback={
+                    <div className="p-8 text-sm text-muted-foreground">Loading editor…</div>
+                  }
+                >
+                  <Tiptap value={field.value} onChange={field.onChange} />
+                </Suspense>
               </FormControl>
               <FormMessage />
             </FormItem>

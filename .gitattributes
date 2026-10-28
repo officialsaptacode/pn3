@@ -1,0 +1,4 @@
+# Normalize line endings so generated files stop flip-flopping in git status.
+# TanStack Router writes routeTree.gen.ts with LF; without this, core.autocrlf
+# setups report it modified on every regeneration.
+apps/admin/src/routeTree.gen.ts text eol=lf

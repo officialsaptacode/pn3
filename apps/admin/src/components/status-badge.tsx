@@ -16,6 +16,8 @@ export function StatusBadge({ status }: StatusBadgeProps) {
     case "DRAFT":
     case "NEW":
     case "CONTACTED":
+    case "QUEUED":
+    case "SCHEDULED":
       variant = "secondary"; // Usually gray or blueish
       break;
     case "ARCHIVE":

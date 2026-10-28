@@ -8,10 +8,15 @@ import {
   CardHeader,
   CardTitle,
 } from "@workspace/ui/components/card";
-import { OverviewChart } from "./-components/overview-chart";
+import { lazy, Suspense } from "react";
 import { RecentBookings } from "./-components/recent-bookings";
 import { RecentInquiries } from "./-components/recent-inquiries";
 import { StatsCards } from "./-components/stats-cards";
+
+// recharts is the heaviest dep on this route — split it out of the main chunk.
+const OverviewChart = lazy(() =>
+  import("./-components/overview-chart").then((m) => ({ default: m.OverviewChart })),
+);
 
 export const Route = createFileRoute("/_auth/dashboard/")({
   component: DashboardPage,
@@ -52,7 +57,13 @@ function DashboardPage() {
             <CardDescription>Bookings over the last 6 months</CardDescription>
           </CardHeader>
           <CardContent className="pl-2">
-            {chartData && <OverviewChart data={chartData} />}
+            {chartData && (
+              <Suspense
+                fallback={<div className="p-8 text-sm text-muted-foreground">Loading chart…</div>}
+              >
+                <OverviewChart data={chartData} />
+              </Suspense>
+            )}
           </CardContent>
         </Card>
         <Card className="col-span-3">

@@ -49,7 +49,7 @@ Current state: `packages/cli/index.js` — minimal, zero-dependency, works.
   - `Include CMS/Blog? (yes/no)` — strips `apps/admin/src/routes/_auth/blogs/` if no
   - `Include Trip/Booking module? (yes/no)` — controlled by trips feature
   - `Payment gateway? (Stripe / LemonSqueezy / None)`
-- [ ] **Brand injection across ALL files**: Currently only rewrites root `package.json`. Should also replace `"pn3"` strings in all `apps/*/package.json`, `turbo.json`, and `prisma/schema.prisma` `@@map` tables.
+- [ ] **Brand injection across ALL files**: Currently only rewrites root `package.json`. Should also replace `"saptasms"` strings in all `apps/*/package.json`, `turbo.json`, and `prisma/schema.prisma` `@@map` tables.
 - [ ] **Auto-generate secrets**: Generate `JWT_SECRET_KEY`, `JWT_REFRESH_SECRET_KEY` using `crypto.randomBytes(64).toString('hex')` and write to `.env` automatically.
 - [ ] **`npx` support**: Publish to npm as `create-shadow-app` so teams can run `npx create-shadow-app` without cloning this repo. Add `"files": ["index.js"]` to `packages/cli/package.json`.
 - [ ] **Latest package versions**: After clone, run `npx npm-check-updates -u && pnpm install` automatically inside the CLI instead of printing instructions.

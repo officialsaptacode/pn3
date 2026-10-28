@@ -1,22 +1,14 @@
 "use client";
 
-import React from "react";
-import { BubbleMenu as TiptapBubbleMenu, type Editor } from "@tiptap/react";
-import { 
-  Bold, 
-  Italic, 
-  Strikethrough, 
-  Underline as UnderlineIcon,
-  Link as LinkIcon,
-  Highlighter
-} from "lucide-react";
+import type { Editor } from "@tiptap/react";
+import { BubbleMenu as TiptapBubbleMenu } from "@tiptap/react/menus";
 import { Toggle } from "@workspace/ui/components/toggle";
+import { Bold, Highlighter, Italic, Strikethrough, Underline as UnderlineIcon } from "lucide-react";
 
 export const BubbleMenu = ({ editor }: { editor: Editor }) => {
   return (
-    <TiptapBubbleMenu 
-      editor={editor} 
-      tippyOptions={{ duration: 100 }}
+    <TiptapBubbleMenu
+      editor={editor}
       className="flex items-center space-x-1 rounded-lg border bg-background p-1 shadow-xl backdrop-blur-md"
     >
       <Toggle

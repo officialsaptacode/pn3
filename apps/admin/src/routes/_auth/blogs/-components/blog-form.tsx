@@ -22,12 +22,15 @@ import {
 } from "@workspace/ui/components/select";
 import { MultipleSelect } from "@workspace/ui/multi-select";
 import { X } from "lucide-react";
-import { useState } from "react";
+import { lazy, Suspense, useState } from "react";
 import { useForm } from "react-hook-form";
 import { toast } from "sonner";
 import { z } from "zod";
 import { MediaLibraryModal } from "@/components/MediaLibrary";
-import Tiptap from "@/components/tip-tap";
+
+// tiptap is the heaviest dep on form routes — split it out of the main chunk.
+const Tiptap = lazy(() => import("@/components/tip-tap"));
+
 import { useFormToast } from "@/hooks/use-form-toast";
 
 const blogSchema = z.object({
@@ -274,7 +277,13 @@ export function BlogForm({ initialData }: BlogFormProps) {
             <FormItem>
               <FormLabel required>Content</FormLabel>
               <FormControl>
-                <Tiptap value={field.value} onChange={field.onChange} />
+                <Suspense
+                  fallback={
+                    <div className="p-8 text-sm text-muted-foreground">Loading editor…</div>
+                  }
+                >
+                  <Tiptap value={field.value} onChange={field.onChange} />
+                </Suspense>
               </FormControl>
               <FormMessage />
             </FormItem>

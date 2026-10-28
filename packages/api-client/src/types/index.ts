@@ -535,3 +535,133 @@ export interface DashboardChartData {
   bookings: number;
   confirmed: number;
 }
+
+export interface SmsListParams {
+  page?: number;
+  limit?: number;
+}
+
+export interface SmsListResult<T> {
+  data: T[];
+  total: number;
+}
+
+export interface SmsTemplateUser {
+  id: number;
+  email: string;
+}
+
+export interface SmsTemplateItem {
+  id: number;
+  name: string;
+  content: string;
+  spamScore: number | null;
+  isApproved: boolean;
+  createdAt: string;
+  user: SmsTemplateUser;
+  _count: { campaigns: number };
+}
+
+// Raw template row as returned by the admin write endpoints (no relations joined).
+export interface SmsTemplateRecord {
+  id: number;
+  createdAt: string;
+  updatedAt: string;
+  name: string;
+  content: string;
+  spamScore: number | null;
+  isApproved: boolean;
+  userId: number;
+}
+
+export interface SmsTemplateUpdateResult extends SmsTemplateRecord {
+  complianceInvalidated: boolean;
+}
+
+// Result of the temporary test-send endpoint (spam check + delivery).
+export interface SmsTestSendResult {
+  success: boolean;
+  blocked: boolean;
+  score: number | null;
+  isSpam: boolean;
+  providerMessageId?: string;
+  message: string;
+  error?: string;
+}
+
+export interface SmsCampaignItem {
+  id: number;
+  name: string;
+  status: string;
+  totalRows: number;
+  processedRows: number;
+  failedRows: number;
+  sendAt: string | null;
+  createdAt: string;
+  template: { id: number; name: string };
+  user: SmsTemplateUser;
+  _count: { smsJobs: number };
+}
+
+// Raw campaign row as returned by the admin write endpoints (no relations joined).
+export interface SmsCampaignRecord {
+  id: number;
+  createdAt: string;
+  updatedAt: string;
+  name: string;
+  status: string;
+  templateId: number;
+  csvMediaId: number | null;
+  userId: number;
+  totalRows: number;
+  processedRows: number;
+  failedRows: number;
+  sendAt: string | null;
+}
+
+export interface SmsStatusCount {
+  status: string;
+  _count: { status: number };
+}
+
+export interface SmsFailedJob {
+  id: number;
+  phoneNumber: string;
+  error: string | null;
+  createdAt: string;
+}
+
+export interface SmsCampaignDetail {
+  data: SmsCampaignItem & {
+    template: { id: number; name: string; content: string; isApproved: boolean };
+  };
+  statusBreakdown: SmsStatusCount[];
+  failedJobs: SmsFailedJob[];
+}
+
+export interface SmsOverview {
+  templates: number;
+  templatesApproved: number;
+  campaigns: number;
+  campaignsByStatus: SmsStatusCount[];
+  jobsByStatus: SmsStatusCount[];
+}
+
+export interface SmsRateBucket {
+  t: string;
+  sent: number;
+  failed: number;
+}
+
+export interface SmsCampaignAnalytics {
+  rates: {
+    total: number;
+    sent: number;
+    failed: number;
+    pending: number;
+    sentRate: number;
+    failedRate: number;
+  };
+  buckets: SmsRateBucket[];
+  topErrors: { error: string | null; count: number }[];
+}

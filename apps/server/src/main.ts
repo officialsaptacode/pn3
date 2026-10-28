@@ -42,10 +42,10 @@ async function bootstrap() {
   });
 
   const config = new DocumentBuilder()
-    .setTitle("Project Travels API")
-    .setDescription("The Project Travels API description")
+    .setTitle("Sapta SMS API")
+    .setDescription("The Sapta SMS API description")
     .setVersion("1.0")
-    .addTag("Project Travels API")
+    .addTag("Sapta SMS API")
     .addBearerAuth()
     .build();
   const document = SwaggerModule.createDocument(app, config);

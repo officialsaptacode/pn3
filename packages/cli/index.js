@@ -6,7 +6,7 @@ const path = require("path");
 const readline = require("readline");
 
 const rl = readline.createInterface({ input: process.stdin, output: process.stdout });
-const REPO_URL = "https://github.com/saptacode/pn3.git"; // Update with actual repo if private
+const REPO_URL = "https://github.com/saptacode/saptasms.git"; // Update with actual repo if private
 
 rl.question("SaaS Project Name (e.g. acme-corp): ", (projectName) => {
   if (!projectName) {

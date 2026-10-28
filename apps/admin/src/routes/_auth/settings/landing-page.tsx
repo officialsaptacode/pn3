@@ -5,9 +5,15 @@ import { Button } from "@workspace/ui/components/button";
 import { Input } from "@workspace/ui/components/input";
 import { Label } from "@workspace/ui/components/label";
 import { MultipleSelect } from "@workspace/ui/components/multi-select";
-import { useEffect, useState } from "react";
+import { lazy, Suspense, useEffect, useState } from "react";
 import { toast } from "sonner";
-import Tiptap from "@/components/tip-tap";
+
+// tiptap is the heaviest dep on form routes — split it out of the main chunk.
+const Tiptap = lazy(() => import("@/components/tip-tap"));
+
+function EditorFallback() {
+  return <div className="p-8 text-sm text-muted-foreground">Loading editor…</div>;
+}
 
 export const Route = createFileRoute("/_auth/settings/landing-page")({
   component: LandingPageSettings,
@@ -181,7 +187,9 @@ function LandingPageSettings() {
           </div>
           <div className="space-y-2">
             <Label>Content</Label>
-            <Tiptap value={aboutUsContent} onChange={setAboutUsContent} />
+            <Suspense fallback={<EditorFallback />}>
+              <Tiptap value={aboutUsContent} onChange={setAboutUsContent} />
+            </Suspense>
           </div>
         </div>
         <div className="p-6 border rounded-lg bg-card space-y-4">
@@ -198,7 +206,9 @@ function LandingPageSettings() {
 
           <div className="space-y-2">
             <Label>Description</Label>
-            <Tiptap value={ourSpecialitiesDescription} onChange={setOurSpecialitiesDescription} />
+            <Suspense fallback={<EditorFallback />}>
+              <Tiptap value={ourSpecialitiesDescription} onChange={setOurSpecialitiesDescription} />
+            </Suspense>
           </div>
 
           <div className="space-y-2">
@@ -226,7 +236,9 @@ function LandingPageSettings() {
 
           <div className="space-y-2">
             <Label>Description</Label>
-            <Tiptap value={packagesDescription} onChange={setPackagesDescription} />
+            <Suspense fallback={<EditorFallback />}>
+              <Tiptap value={packagesDescription} onChange={setPackagesDescription} />
+            </Suspense>
           </div>
 
           <div className="space-y-2">

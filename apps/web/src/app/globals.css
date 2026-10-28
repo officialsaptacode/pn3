@@ -1,0 +1,66 @@
+@import "tailwindcss";
+
+@theme {
+  --font-sans: "Mukta", "Noto Sans Devanagari", ui-sans-serif, system-ui, sans-serif;
+  --font-mono: "JetBrains Mono", ui-monospace, monospace;
+
+  /* SaptaSMS ledger palette — deep ink + paddy teal + sindoor stamp */
+  --color-ink-950: #12202e;
+  --color-ink-900: #1a2b3c;
+  --color-ink-700: #2f4459;
+  --color-ink-500: #64748b;
+  --color-paper-50: #ffffff;
+  --color-paper-100: #faf7f0;
+  --color-paper-200: #f2eee6;
+  --color-paper-300: #e7e0d2;
+  --color-teal-700: #0c5c51;
+  --color-teal-600: #0e6b5e;
+  --color-teal-100: #d9ece7;
+  --color-teal-50: #eef6f3;
+  --color-stamp-600: #c93a2e;
+  --color-stamp-50: #fdecea;
+  --color-ledger-500: #c8a84b;
+  --color-ledger-100: #f3e9c9;
+}
+
+html {
+  scroll-behavior: smooth;
+}
+
+/* Ledger ruled-paper backdrop for the SMS studio */
+.ledger-paper {
+  background-color: var(--color-paper-100);
+  background-image: repeating-linear-gradient(
+    to bottom,
+    transparent 0,
+    transparent 31px,
+    rgba(26, 43, 60, 0.06) 31px,
+    rgba(26, 43, 60, 0.06) 32px
+  );
+}
+
+/* Rubber-stamp badge — the single signature element */
+.stamp {
+  transform: rotate(-6deg);
+  border: 2.5px double currentColor;
+  mask-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='120' height='120'%3E%3Cfilter id='n'%3E%3CfeTurbulence baseFrequency='0.9'/%3E%3C/filter%3E%3Crect width='120' height='120' filter='url(%23n)' opacity='0.12'/%3E%3C/svg%3E");
+}
+
+/* Keyboard a11y floor: border-only :focus styles are too faint on paper */
+:focus-visible {
+  outline: 2px solid var(--color-teal-600);
+  outline-offset: 2px;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  html {
+    scroll-behavior: auto;
+  }
+  /* Unlayered CSS beats Tailwind's layered utilities, so no !important needed. */
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms;
+    transition-duration: 0.01ms;
+  }
+}

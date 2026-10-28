@@ -1,0 +1,97 @@
+import { Processor, WorkerHost } from "@nestjs/bullmq";
+import { Injectable, Logger } from "@nestjs/common";
+import { Job } from "bullmq";
+import { PrismaService } from "@/prisma/prisma.service";
+import { SmsService } from "@/sms/sms.service";
+
+@Processor("sms-queue", {
+  concurrency: 5,
+  limiter: {
+    max: 50,
+    duration: 1000,
+  },
+})
+@Injectable()
+export class SmsProcessor extends WorkerHost {
+  private readonly logger = new Logger(SmsProcessor.name);
+
+  constructor(
+    private prisma: PrismaService,
+    private smsService: SmsService,
+  ) {
+    super();
+  }
+
+  async process(job: Job<any, any, string>): Promise<any> {
+    const { campaignId, jobId, phoneNumber, payload } = job.data;
+    // sms_jobs.id is BIGINT; the queue payload carries it as a number.
+    const jobRecordId = BigInt(jobId);
+
+    this.logger.debug(`Processing SMS Job ${jobId} for +${phoneNumber}`);
+
+    try {
+      const providerMessageId = await this.smsService.deliverSms(phoneNumber, payload.message);
+
+      await this.prisma.smsJob.update({
+        where: { id: jobRecordId },
+        data: {
+          status: "SENT",
+          sentAt: new Date(),
+          attempts: { increment: 1 },
+          ...(providerMessageId ? { providerMessageId } : {}),
+        },
+      });
+
+      this.smsService.emitJobEvent({ campaignId, jobId, status: "SENT" });
+
+      await this.syncCampaignCounters(campaignId);
+    } catch (error) {
+      const message = error instanceof Error ? error.message : String(error);
+      this.logger.error(`Failed to send SMS to ${phoneNumber}: ${message}`);
+
+      await this.prisma.smsJob.update({
+        where: { id: jobRecordId },
+        data: {
+          status: "FAILED",
+          error: message,
+          attempts: { increment: 1 },
+        },
+      });
+
+      this.smsService.emitJobEvent({ campaignId, jobId, status: "FAILED" });
+
+      await this.syncCampaignCounters(campaignId);
+
+      throw error; // Let BullMQ handle retry based on backoff
+    }
+  }
+
+  // Counters are derived from the job rows so retries and BullMQ backoff never double-count.
+  // Status is derived the same way: SCHEDULED -> SENDING -> COMPLETED/FAILED.
+  private async syncCampaignCounters(campaignId: number) {
+    await this.prisma.$executeRaw`
+      UPDATE campaigns
+      SET "processedRows" = (
+            SELECT COUNT(*)::int FROM sms_jobs
+            WHERE "campaignId" = campaigns.id AND status = 'SENT'
+          ),
+          "failedRows" = (
+            SELECT COUNT(*)::int FROM sms_jobs
+            WHERE "campaignId" = campaigns.id AND status = 'FAILED'
+          ),
+          status = CASE
+            WHEN EXISTS (
+              SELECT 1 FROM sms_jobs
+              WHERE "campaignId" = campaigns.id AND status = 'PENDING'
+            ) THEN 'SENDING'::"CampaignStatus"
+            WHEN EXISTS (
+              SELECT 1 FROM sms_jobs
+              WHERE "campaignId" = campaigns.id AND status = 'FAILED'
+            ) THEN 'FAILED'::"CampaignStatus"
+            ELSE 'COMPLETED'::"CampaignStatus"
+          END,
+          "updatedAt" = NOW()
+      WHERE id = ${campaignId}
+    `;
+  }
+}

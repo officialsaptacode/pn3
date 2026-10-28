@@ -1,7 +1,4 @@
-import createNextIntlPlugin from "next-intl/plugin";
 import type { NextConfig } from "next";
-
-const withNextIntl = createNextIntlPlugin("./src/i18n/request.ts");
 
 const nextConfig: NextConfig = {
   transpilePackages: ["@workspace/ui", "@workspace/api-client"],
@@ -38,16 +35,8 @@ const nextConfig: NextConfig = {
     ],
   },
   async redirects() {
-    return [
-      // Redirect old /treks/:slug routes to /packages/:slug temporarily
-      // TODO: Update to hierarchical routes once destination data is available
-      {
-        source: "/treks/:slug",
-        destination: "/packages/:slug",
-        permanent: false,
-      },
-    ];
+    return [];
   },
 };
 
-export default withNextIntl(nextConfig);
+export default nextConfig;
