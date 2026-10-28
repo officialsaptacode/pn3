@@ -24,7 +24,7 @@ const jetBrainsMono = JetBrains_Mono({
 export const metadata: Metadata = {
   title: "SaptaSMS — Compliant bulk SMS for micro-finance",
   description:
-    "Draft loan-reminder templates with AI, pass Laya compliance, and send bulk SMS via AkashSMS at 50 messages per second.",
+    "Draft loan-reminder templates with AI, pass CLEF spam checks, and send bulk SMS via AkashSMS at 50 messages per second.",
 };
 
 export default function RootLayout({
@@ -79,7 +79,7 @@ export default function RootLayout({
               <strong className="text-ink-900">SaptaSMS</strong> · compliant bulk SMS for
               micro-finance · AkashSMS
             </p>
-            <p className="font-mono text-xs">AI drafts · Laya approves · BullMQ sends</p>
+            <p className="font-mono text-xs">AI drafts · CLEF approves · BullMQ sends</p>
           </div>
         </footer>
       </body>

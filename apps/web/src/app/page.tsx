@@ -12,7 +12,7 @@ const STEPS = [
   {
     no: "02",
     icon: ShieldCheck,
-    title: "Pass Laya compliance",
+    title: "Pass CLEF spam checks",
     body: "System 1 scores the template for spam and compliance risk. Under 0.5 gets the stamp — blocked templates never send.",
   },
   {

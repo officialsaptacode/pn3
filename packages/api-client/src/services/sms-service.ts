@@ -9,9 +9,37 @@ import type {
   SmsTemplateItem,
   SmsTemplateRecord,
   SmsTemplateUpdateResult,
+  SmsTestSendResult,
 } from "../types";
 
 export const smsService = {
+  testSend: async (
+    body: { phoneNumber: string; message: string },
+    options?: FetchOptions,
+  ): Promise<SmsTestSendResult> => {
+    return httpClient.post<SmsTestSendResult>("/api/sms/test/send", body, options);
+  },
+
+  createTemplate: async (
+    body: { name: string; content: string },
+    options?: FetchOptions,
+  ): Promise<SmsTemplateRecord> => {
+    return httpClient.post<SmsTemplateRecord>("/api/sms/templates", body, options);
+  },
+
+  createCampaign: async (
+    body: {
+      name: string;
+      templateId: number;
+      csvUrl?: string;
+      csvText?: string;
+      sendAt?: string;
+    },
+    options?: FetchOptions,
+  ): Promise<SmsCampaignRecord> => {
+    return httpClient.post<SmsCampaignRecord>("/api/sms/campaigns", body, options);
+  },
+
   listTemplates: async (
     params?: any,
     options?: FetchOptions,

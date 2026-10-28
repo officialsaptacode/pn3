@@ -62,8 +62,8 @@ export function TemplateRowActions({ template }: TemplateRowActionsProps) {
     onSuccess: async (result) => {
       toast.success(
         result.isApproved
-          ? `Compliance check passed (score ${Number(result.layaScore).toFixed(2)})`
-          : `Compliance check failed (score ${Number(result.layaScore).toFixed(2)})`,
+          ? `Compliance check passed (score ${Number(result.spamScore).toFixed(2)})`
+          : `Compliance check failed (score ${Number(result.spamScore).toFixed(2)})`,
       );
       await invalidate();
     },

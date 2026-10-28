@@ -1,15 +1,17 @@
 # SaptaSMS — Project Status
 
-Last updated: 2026-10-09 · Branch: `feat/ai-sms-wrapper` · PR: [#6](https://github.com/officialsaptacode/pn3/pull/6)
+Last updated: 2026-10-28 · Branch: `feat/ai-sms-wrapper` · PR: [#6](https://github.com/officialsaptacode/pn3/pull/6)
 
 ## Completed
 
 ### Backend (NestJS + BullMQ)
-- [x] Prisma models: `Campaign`, `SmsJob`, `SmsTemplate` (with `layaScore`, `isApproved`, row counters)
+- [x] Prisma models: `Campaign`, `SmsJob`, `SmsTemplate` (with `spamScore`, `isApproved`, row counters)
 - [x] BullMQ queue wired for AkashSMS at max 50 jobs/sec
 - [x] `POST /api/sms/templates` — System 2 draft enhancement (`gpt-4o-mini`)
-- [x] `POST /api/sms/templates/:id/evaluate` — System 1 compliance via self-hosted Laya (`$LAYA_BASE_URL/v1/systemone`, choice-type question, calibrated score → `isApproved`)
+- [x] `POST /api/sms/templates/:id/evaluate` — System 1 compliance via Cloudflare CLEF on Workers AI (`$CLOUDFLARE_AI_BASE_URL/$CLOUDFLARE_ACCOUNT_ID/ai/run/@cf/cloudflare/clef`, `probabilities.A` → score → `isApproved`)
 - [x] `POST /api/sms/presigned-url` + `POST /api/sms/campaigns` — browser→S3 CSV, queue fan-out
+- [x] `POST /api/sms/test/clef/spam-check` + `POST /api/sms/test/send` — ADMIN-guarded temporary test APIs; the send path spam-checks with CLEF and only delivers when it passes
+- [x] Campaign audience source persisted (`csvUrl` / `csvText`) so a campaign survives being created before its CSV is reachable; URLs are SSRF-guarded (`assertPublicUrl`, private/loopback/link-local blocked, redirects re-validated)
 - [x] Admin reads (all `ADMIN`-role guarded): `GET /api/sms/admin/overview`, `/admin/templates`, `/admin/campaigns`, `/admin/campaigns/:id` (validated query DTOs, paginated, capped at 100)
 - [x] Fixed server build breaks: `sms.processor.ts` unknown-error, `test-setup.ts` build exclusion
 - [x] `prisma/seed.ts` (`pnpm db:seed`) — ADMIN + manager users, 2 templates, 1 campaign with 3 jobs (2 SENT / 1 FAILED); verified live against Neon
@@ -24,12 +26,14 @@ Last updated: 2026-10-09 · Branch: `feat/ai-sms-wrapper` · PR: [#6](https://gi
 
 ### Admin (Vite + TanStack Router)
 - [x] SMS section: campaigns table (progress %), campaign detail (delivery cards + latest 20 failures), templates table (approval stamps) + sidebar nav
+- [x] Campaign create screen (name + approved template + CSV file upload or CSV URL + optional `sendAt`)
+- [x] Test Send dialog — runs the temporary test API and logs request/response to the browser console
 - [x] `smsService` + types in `@workspace/api-client`
 - [x] Fixed admin dev/build blockers: tiptap v3 `BubbleMenu` import path, dropped `framer-motion` for plain CSS
 
 ### Verified live
 - [x] Admin login (`admin@saptasms.com`), overview counts match seed
-- [x] Laya end-to-end: fresh template scored **0.238 → Approved** (real calibrated score, not mock/fail-safe)
+- [x] CLEF end-to-end: fresh template scored below 0.5 → Approved; spam wording scored above 0.5 → Blocked
 
 ## Remaining (must-do)
 
@@ -47,7 +51,7 @@ Last updated: 2026-10-09 · Branch: `feat/ai-sms-wrapper` · PR: [#6](https://gi
 
 - [ ] **UCS-2 segment counter** — the 160/153-char math assumes GSM-7; Devanagari SMS content needs 70/67-char segments or cost estimates mislead
 - [x] Retry-failed-jobs button in admin campaign detail (`POST /api/sms/admin/campaigns/:id/retry` — re-queues FAILED jobs, resets counters)
-- [x] Approve/reject templates from the admin panel (`PATCH /api/sms/admin/templates/:id` — edit name/content, approve/reject; editing wording clears the Laya score and requires re-evaluation)
+- [x] Approve/reject templates from the admin panel (`PATCH /api/sms/admin/templates/:id` — edit name/content, approve/reject; editing wording clears the spam score and requires re-evaluation)
 - [ ] Live send progress (WebSocket or polling) on campaign detail + web activity page — WS gateway is live at `ws/campaigns` but the admin UI does not subscribe yet
 - [x] Scheduled campaigns (`send_at` + admin schedule dialog + BullMQ delayed-job dispatch; "Send now" button releases a scheduled campaign early)
 - [x] Per-campaign cost estimator (segments × rows × rate) — `GET /api/sms/admin/campaigns/:id/advanced-analytics`

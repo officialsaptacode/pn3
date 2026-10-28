@@ -13,6 +13,7 @@ import { parse } from "csv-parse/sync";
 import { Subject as RxSubject } from "rxjs";
 import { v4 as uuidv4 } from "uuid";
 import { PrismaService } from "@/prisma/prisma.service";
+import { assertPublicUrl, fetchPublicUrl } from "./csv-source";
 import {
   CampaignAnalyticsQueryDto,
   CampaignListQueryDto,
@@ -108,88 +109,215 @@ export class SmsService {
     const template = await this.prisma.smsTemplate.findUnique({ where: { id: templateId } });
     if (!template) throw new BadRequestException("Template not found");
 
-    // System 1: self-hosted Laya (laya-serve, Jev-compatible POST /v1/systemone).
-    // convaiinnovations/laya answers typed questions — it is not a spam-label
-    // classifier, so we ask a two-option choice with neutral keys (per Laya
-    // docs, noul follows its option labels on this checkpoint).
-    let layaScore = 0.1;
+    // System 1: Cloudflare CLEF spam detection (Jev/SystemOne-compatible POST /v1/systemone)
+    let clefScore = 0.1;
     try {
-      const base = (process.env.LAYA_BASE_URL || "").replace(/\/+$/, "");
-      const layaKey = process.env.LAYA_API_KEY;
-      if (base) {
-        const response = await fetch(`${base}/v1/systemone`, {
-          method: "POST",
-          headers: {
-            "Content-Type": "application/json",
-            ...(layaKey ? { Authorization: `Bearer ${layaKey}` } : {}),
-          },
-          body: JSON.stringify({
-            state: { document: template.content },
-            questions: {
-              spam_check: {
-                type: "choice",
-                instructions:
-                  "Is this SMS spam, fraud, or otherwise non-compliant for a micro-finance payment reminder?",
-                criteria: {
-                  A: "yes, it is spam, fraud, or non-compliant",
-                  B: "no, it is a legitimate payment reminder",
-                },
-              },
-            },
-          }),
-        });
-        if (!response.ok) throw new Error(`Laya server responded ${response.status}`);
-        const data = await response.json();
-        const answer = data?.answers?.spam_check;
-        const choice = String(answer?.choice ?? "").toLowerCase();
-        const isSpam = choice === "a" || choice.startsWith("yes") || choice.includes("spam");
-        const confidence = typeof answer?.confidence === "number" ? answer.confidence : null;
-        layaScore =
-          confidence != null ? (isSpam ? confidence : 1 - confidence) : isSpam ? 0.9 : 0.1;
-        this.logger.log(
-          `Laya scored template ${templateId}: choice=${answer?.choice} score=${layaScore}`,
-        );
-      } else {
+      const score = await this.scoreSpamWithClef(template.content);
+      if (score == null) {
         // Fallback mock logic if no server configured
         const isSpam = template.content.toLowerCase().includes("viagra");
-        layaScore = isSpam ? 0.95 : 0.1;
+        clefScore = isSpam ? 0.95 : 0.1;
+        this.logger.warn("CLEF not configured, using fallback mock scoring");
+      } else {
+        clefScore = score;
+        this.logger.log(`CLEF scored template ${templateId}: score=${clefScore}`);
       }
     } catch (e) {
-      this.logger.error("Laya evaluation failed", e);
-      layaScore = 0.5; // Neutral fail-safe
+      this.logger.error("CLEF evaluation failed", e);
+      clefScore = 0.5; // Neutral fail-safe
     }
 
     return this.prisma.smsTemplate.update({
       where: { id: templateId },
       data: {
-        layaScore,
-        isApproved: layaScore < 0.5,
+        spamScore: clefScore,
+        isApproved: clefScore < 0.5,
       },
     });
   }
 
+  async testClefSpamDetection(text: string) {
+    try {
+      const score = await this.scoreSpamWithClef(text);
+      if (score == null) {
+        this.logger.warn("CLEF test: Missing configuration, using fallback mock");
+        const isSpam =
+          text.toLowerCase().includes("viagra") || text.toLowerCase().includes("free money");
+        const mockScore = isSpam ? 0.95 : 0.1;
+        this.logger.log(`CLEF test spam detection operation successful (mock). Score=${mockScore}`);
+        return { success: true, score: mockScore, isSpam, mock: true };
+      }
+
+      this.logger.log(`CLEF test spam detection operation successful. Score=${score}`);
+      return { success: true, score, isSpam: score >= 0.5, mock: false };
+    } catch (e) {
+      this.logger.error("CLEF test spam detection operation failed", e);
+      this.logger.log("CLEF test spam detection operation failed");
+      return { success: false, error: String(e) };
+    }
+  }
+
+  /**
+   * Delivers a single SMS through the AkashSMS provider.
+   * With DRY_RUN=true it only logs the message and never touches the provider.
+   * Returns the provider message id when one is available.
+   */
+  async deliverSms(phoneNumber: string, message: string): Promise<string | undefined> {
+    if (process.env.DRY_RUN === "true") {
+      this.logger.log(`[DRY RUN] Would send SMS to ${phoneNumber}: ${message}`);
+      await new Promise((resolve) => setTimeout(resolve, 100));
+      return undefined;
+    }
+
+    const authToken = process.env.AKASHSMS_AUTH_TOKEN;
+    if (!authToken) throw new Error("Missing AKASHSMS_AUTH_TOKEN in environment");
+
+    this.logger.log(`Sending SMS to ${phoneNumber} via AkashSMS API...`);
+    const response = await fetch("https://aakashsms.com/admin/public/sms/v3/send", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ auth_token: authToken, to: phoneNumber, text: message }),
+    });
+
+    if (!response.ok) {
+      const errData = await response.text();
+      throw new Error(`AkashSMS API Error: ${response.status} - ${errData}`);
+    }
+
+    try {
+      const ack = await response.json();
+      return ack?.data?.message_id ?? ack?.message_id ?? undefined;
+    } catch {
+      return undefined;
+    }
+  }
+
+  /**
+   * Temporary test API: spam-checks a message with CLEF and only delivers it
+   * when it passes. Logs the outcome to the console either way.
+   */
+  async testSendSms(phoneNumber: string, message: string) {
+    const result = {
+      success: false,
+      blocked: false,
+      score: null as number | null,
+      isSpam: false,
+      providerMessageId: undefined as string | undefined,
+      message: "",
+      error: undefined as string | undefined,
+    };
+
+    try {
+      const score = await this.scoreSpamWithClef(message);
+      result.score = score;
+
+      if (score == null) {
+        result.error =
+          "CLEF is not configured - set CLOUDFLARE_ACCOUNT_ID and CLOUDFLARE_API_TOKEN";
+        result.message = "Test send operation failed";
+        this.logger.error(`CLEF test send failed: ${result.error}`);
+        return result;
+      }
+
+      result.isSpam = score >= 0.5;
+
+      if (result.isSpam) {
+        this.logger.warn(
+          `CLEF test send blocked as spam: phone=${phoneNumber} score=${score} message=${message}`,
+        );
+        result.blocked = true;
+        result.message = "Message blocked by CLEF spam detection";
+        return result;
+      }
+
+      const providerMessageId = await this.deliverSms(phoneNumber, message);
+      result.providerMessageId = providerMessageId;
+      result.success = true;
+      result.message = "Message sent successfully";
+      this.logger.log(
+        `CLEF test send successful: phone=${phoneNumber} score=${score} message=${message}`,
+      );
+      return result;
+    } catch (e) {
+      this.logger.error(`CLEF test send failed: phone=${phoneNumber}`, e);
+      result.error = e instanceof Error ? e.message : String(e);
+      result.message = "Test send operation failed";
+      return result;
+    }
+  }
+
+  /**
+   * Scores SMS text with Cloudflare CLEF. Returns null when the Cloudflare
+   * environment variables are not configured, so callers can fall back.
+   */
+  private async scoreSpamWithClef(text: string): Promise<number | null> {
+    const accountId = process.env.CLOUDFLARE_ACCOUNT_ID;
+    const apiToken = process.env.CLOUDFLARE_API_TOKEN;
+    const base = (process.env.CLOUDFLARE_AI_BASE_URL || "").replace(/\/+$/, "");
+    if (!accountId || !apiToken || !base) return null;
+
+    // Workers AI run endpoint for the CLEF decision model.
+    const url = `${base}/${accountId}/ai/run/@cf/cloudflare/clef`;
+    const response = await fetch(url, {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        Authorization: `Bearer ${apiToken}`,
+      },
+      body: JSON.stringify({
+        state: { document: text },
+        questions: {
+          spam_check: {
+            type: "choice",
+            instructions:
+              "Is this SMS spam, fraud, or otherwise non-compliant for a micro-finance payment reminder?",
+            criteria: {
+              A: "yes, it is spam, fraud, or non-compliant",
+              B: "no, it is a legitimate payment reminder",
+            },
+          },
+        },
+      }),
+    });
+    if (!response.ok) throw new Error(`CLEF server responded ${response.status}`);
+
+    const data = await response.json();
+    const answer = data?.result?.answers?.spam_check;
+    // "A" is the spam option, so probabilities.A is the probability it is spam.
+    const probability = answer?.probabilities?.A;
+    if (typeof probability === "number") return probability;
+
+    const choice = String(answer?.choice ?? "").toLowerCase();
+    const isSpam = choice === "a" || choice.startsWith("yes") || choice.includes("spam");
+    const confidence = typeof answer?.confidence === "number" ? answer.confidence : null;
+    return confidence != null ? (isSpam ? confidence : 1 - confidence) : isSpam ? 0.9 : 0.1;
+  }
+
+  /**
+   * Creates a campaign.
+   *
+   * The audience CSV can be supplied as a URL or as inline text. When the CSV
+   * is readable at creation time the campaign is queued straight away; when it
+   * is not (for example an S3 bucket that is not configured yet) the campaign
+   * is still saved as DRAFT so it can be sent later from the admin panel.
+   */
   async createCampaign(
     userId: number,
     name: string,
     templateId: number,
-    csvUrl: string,
+    csvUrl?: string | null,
+    csvText?: string | null,
     sendAt?: string | null,
   ) {
     const template = await this.prisma.smsTemplate.findUnique({ where: { id: templateId } });
     if (!template || !template.isApproved) {
       throw new BadRequestException("Template must be approved before campaign creation");
     }
-
-    let dataRows: any[] = [];
-    try {
-      const response = await fetch(csvUrl);
-      const csvText = await response.text();
-      dataRows = parse(csvText, { columns: true, skip_empty_lines: true });
-    } catch (e) {
-      this.logger.error("Failed to parse CSV", e);
-      throw new InternalServerErrorException("Failed to read or parse the uploaded CSV");
+    if (!csvUrl && !csvText) {
+      throw new BadRequestException("A CSV file or CSV URL is required");
     }
 
+    const { csvRows, readable } = await this.readAudienceAtCreation(csvUrl, csvText);
     const scheduledFor = sendAt ? new Date(sendAt) : null;
 
     const campaign = await this.prisma.campaign.create({
@@ -199,15 +327,74 @@ export class SmsService {
         userId,
         status: "DRAFT",
         sendAt: scheduledFor,
+        csvUrl: csvUrl ?? null,
+        csvText: csvText ?? null,
+        totalRows: csvRows.length,
       },
     });
 
-    // Queue campaign in background
-    this.queueCampaign(campaign.id, dataRows, template.content, scheduledFor).catch((e) => {
-      this.logger.error(`Error queueing campaign ${campaign.id}: ${e.message}`);
-    });
+    // Only auto-send when the audience was readable at creation time.
+    if (readable) {
+      await this.queueCampaign(campaign.id, csvRows, template.content, scheduledFor);
+    }
 
     return campaign;
+  }
+
+  /**
+   * Reads the audience CSV at creation time.
+   *
+   * Inline text is authoritative: an empty CSV is a hard error. A URL that
+   * cannot be read is not - the campaign is still created and saved as DRAFT.
+   */
+  private async readAudienceAtCreation(
+    csvUrl?: string | null,
+    csvText?: string | null,
+  ): Promise<{ csvRows: any[]; readable: boolean }> {
+    if (csvText) {
+      const csvRows = parse(csvText, { columns: true, skip_empty_lines: true });
+      if (csvRows.length === 0) {
+        throw new BadRequestException("The CSV has no data rows");
+      }
+      return { csvRows, readable: true };
+    }
+
+    if (!csvUrl) return { csvRows: [], readable: false };
+
+    // Rejects private/internal targets before anything is fetched.
+    await assertPublicUrl(csvUrl);
+
+    try {
+      const response = await fetchPublicUrl(csvUrl);
+      if (!response.ok) return { csvRows: [], readable: false };
+      const csvRows = parse(await response.text(), { columns: true, skip_empty_lines: true });
+      return { csvRows, readable: csvRows.length > 0 };
+    } catch {
+      this.logger.warn(`CSV not reachable at creation, saving campaign as draft: ${csvUrl}`);
+      return { csvRows: [], readable: false };
+    }
+  }
+
+  /** Reads the audience rows from the campaign's stored CSV (inline text or URL). */
+  private async loadCsvRows(source: {
+    csvUrl?: string | null;
+    csvText?: string | null;
+  }): Promise<any[]> {
+    if (source.csvText) {
+      return parse(source.csvText, { columns: true, skip_empty_lines: true });
+    }
+    if (!source.csvUrl) {
+      throw new BadRequestException("Campaign has no CSV to read");
+    }
+
+    try {
+      const response = await fetchPublicUrl(source.csvUrl);
+      if (!response.ok) throw new Error(`CSV request failed with status ${response.status}`);
+      return parse(await response.text(), { columns: true, skip_empty_lines: true });
+    } catch (e) {
+      this.logger.error("Failed to parse CSV", e);
+      throw new InternalServerErrorException("Failed to read or parse the uploaded CSV");
+    }
   }
 
   async queueCampaign(
@@ -271,7 +458,7 @@ export class SmsService {
     const contentChanged =
       body.content !== undefined && body.content.trim() !== existing.content.trim();
 
-    // Editing the wording invalidates the Laya compliance score — re-evaluate before use.
+    // Editing the wording invalidates the spam score — re-evaluate before use.
     const resetCompliance = contentChanged && body.isApproved === undefined;
 
     const template = await this.prisma.smsTemplate.update({
@@ -279,7 +466,7 @@ export class SmsService {
       data: {
         name: body.name ?? undefined,
         content: body.content ?? undefined,
-        ...(resetCompliance ? { layaScore: null, isApproved: false } : {}),
+        ...(resetCompliance ? { spamScore: null, isApproved: false } : {}),
         ...(body.isApproved !== undefined ? { isApproved: body.isApproved } : {}),
       },
     });
@@ -441,7 +628,7 @@ export class SmsService {
   async scheduleCampaign(id: number, body: ScheduleCampaignDto) {
     const campaign = await this.prisma.campaign.findUnique({
       where: { id },
-      select: { id: true, name: true },
+      include: { template: true },
     });
     if (!campaign) throw new NotFoundException("Campaign not found");
 
@@ -462,6 +649,16 @@ export class SmsService {
       where: { campaignId: id, status: "PENDING" },
       select: { id: true, phoneNumber: true, payload: true },
     });
+
+    // A campaign that was never sent has no jobs yet - build them from its CSV.
+    if (pending.length === 0) {
+      const dataRows = await this.loadCsvRows(campaign);
+      await this.queueCampaign(id, dataRows, campaign.template.content, sendAt);
+      return this.prisma.campaign.update({
+        where: { id },
+        data: { sendAt, name: body.name ?? undefined },
+      });
+    }
 
     for (const job of pending) {
       const queueJobId = `sms-${job.id}`;

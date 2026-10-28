@@ -1,6 +1,5 @@
 import { Processor, WorkerHost } from "@nestjs/bullmq";
 import { Injectable, Logger } from "@nestjs/common";
-import { ConfigService } from "@nestjs/config";
 import { Job } from "bullmq";
 import { PrismaService } from "@/prisma/prisma.service";
 import { SmsService } from "@/sms/sms.service";
@@ -18,7 +17,6 @@ export class SmsProcessor extends WorkerHost {
 
   constructor(
     private prisma: PrismaService,
-    private configService: ConfigService,
     private smsService: SmsService,
   ) {
     super();
@@ -32,44 +30,7 @@ export class SmsProcessor extends WorkerHost {
     this.logger.debug(`Processing SMS Job ${jobId} for +${phoneNumber}`);
 
     try {
-      const isDryRun = this.configService.get("DRY_RUN") === "true";
-      let providerMessageId: string | undefined;
-
-      if (isDryRun) {
-        this.logger.log(`[DRY RUN] Would send SMS to ${phoneNumber}: ${payload.message}`);
-        // Simulate network delay
-        await new Promise((resolve) => setTimeout(resolve, 100));
-      } else {
-        this.logger.log(`Sending SMS to ${phoneNumber} via AkashSMS API...`);
-        const akashAuthToken = this.configService.get("AKASHSMS_AUTH_TOKEN");
-        if (!akashAuthToken) {
-          throw new Error("Missing AKASHSMS_AUTH_TOKEN in environment");
-        }
-
-        const response = await fetch("https://aakashsms.com/admin/public/sms/v3/send", {
-          method: "POST",
-          headers: {
-            "Content-Type": "application/json",
-          },
-          body: JSON.stringify({
-            auth_token: akashAuthToken,
-            to: phoneNumber,
-            text: payload.message,
-          }),
-        });
-
-        if (!response.ok) {
-          const errData = await response.text();
-          throw new Error(`AkashSMS API Error: ${response.status} - ${errData}`);
-        }
-
-        try {
-          const ack = await response.json();
-          providerMessageId = ack?.data?.message_id ?? ack?.message_id ?? undefined;
-        } catch {
-          providerMessageId = undefined;
-        }
-      }
+      const providerMessageId = await this.smsService.deliverSms(phoneNumber, payload.message);
 
       await this.prisma.smsJob.update({
         where: { id: jobRecordId },

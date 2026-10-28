@@ -17,7 +17,7 @@ Users are paying standard rates to incumbents (NestSMS, AkashSMS) for a generic 
 
 ## Target User & Narrowest Wedge
 The target user is the micro-finance manager.
-The narrowest wedge is a Minimal Viable Agent that allows them to generate fixed templates using AI, validates the templates against spam/compliance rules using Laya, and bulk-sends the SMS via AkashSMS using standard string interpolation.
+The narrowest wedge is a Minimal Viable Agent that allows them to generate fixed templates using AI, validates the templates against spam/compliance rules using CLEF, and bulk-sends the SMS via AkashSMS using standard string interpolation.
 
 ## Constraints
 - Must prioritize compliance and accuracy over creativity (hallucinating loan amounts is unacceptable).
@@ -33,7 +33,7 @@ The narrowest wedge is a Minimal Viable Agent that allows them to generate fixed
 **Fixed Template Architecture with System-1/System-2 AI:**
 Build a Next.js (frontend) + NestJS (backend) service with BullMQ.
 - **System 2 (Heavy LLM / Template Engine):** Used *once per campaign* by the manager to draft a polite, perfectly formatted 160-character template with variables (e.g., `Dear {name}, your amount of {amount} is due.`).
-- **System 1 (Fast Classifier / Spam Filter):** `convaiinnovations/laya` evaluates the drafted template *once per campaign*. It returns a strict probability score on whether the template is spam or non-compliant. If safe, the template is approved.
+- **System 1 (Fast Classifier / Spam Filter):** Cloudflare CLEF (`@cf/cloudflare/clef` on Workers AI) evaluates the drafted template *once per campaign*. It returns a strict probability score on whether the template is spam or non-compliant. If safe, the template is approved.
 - **Execution (No AI):** The backend uses standard string interpolation to map the CSV rows to the approved template, then drops the batch into a BullMQ queue to fire to AkashSMS at maximum speed.
 
 ## Success Criteria
@@ -45,4 +45,4 @@ A Next.js frontend deployed for the client where the manager can draft templates
 ## Dependencies
 - AkashSMS Reseller API credentials.
 - System 2 API Key (Any generative LLM).
-- System 1 API Key/Endpoint (Laya AI for classification).
+- System 1 API Key/Endpoint (Cloudflare Workers AI for classification).

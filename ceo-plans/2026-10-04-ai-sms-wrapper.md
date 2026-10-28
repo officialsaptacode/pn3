@@ -16,7 +16,7 @@ A fully agentic workflow platform that integrates directly into their accounting
 **Input:** A CSV upload (containing: `Customer Name`, `Phone Number`, `Loan Amount`, etc.).
 **External APIs:** 
 - **SMS Gateway:** AkashSMS Reseller API (the core pipe).
-- **System 1 (Classifier):** `convaiinnovations/laya` (non-autoregressive decision model for guardrails).
+- **System 1 (Classifier):** Cloudflare CLEF (`@cf/cloudflare/clef` on Workers AI) — non-autoregressive decision model for guardrails. *(Originally planned as `convaiinnovations/laya`; swapped to CLEF on 2026-10-28.)*
 - **System 2 (Template Engine):** Any Generative LLM (e.g., GPT-4o-mini, Claude, Llama).
 
 ## Scope Decisions
@@ -32,7 +32,7 @@ A fully agentic workflow platform that integrates directly into their accounting
 - Next.js frontend for campaign creation, CSV uploads, and dashboard.
 - Fixed Template AI architecture: 
   - **System 2 (Template Engine):** Generates the SMS template with variables *once per campaign*.
-  - **System 1 (Spam Filter):** Laya scores the template for spam/compliance *once per campaign*.
+  - **System 1 (Spam Filter):** CLEF scores the template for spam/compliance *once per campaign*.
   - **Bulk Send:** Standard string interpolation (no AI) replaces variables row-by-row and queues for AkashSMS.
 - Real-time WebSockets: Live progress bar in the Next.js UI as BullMQ processes each row.
 
@@ -44,7 +44,7 @@ A fully agentic workflow platform that integrates directly into their accounting
 ## GSTACK REVIEW REPORT
 - Section 1 (Architecture): Configured BullMQ rate limiter for AkashSMS API.
 - Section 2 (Error & Rescue): Fixed template approach eliminates per-row LLM hallucinations.
-- Section 3 (Security): Laya (System-1) explicitly guards against spam/phishing at the template level.
+- Section 3 (Security): CLEF (System-1) explicitly guards against spam/phishing at the template level.
 - Section 4 (Data Flow): Mandated Node.js stream parsing for CSV uploads to prevent OOM crashes.
 - Section 6 (Test Review): Mandated E2E mock test for the AI generation pipeline.
 - Section 8 (Observability): Mandated BullMQ dashboard deployment for visibility.

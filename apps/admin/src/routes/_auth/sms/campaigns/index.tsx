@@ -3,10 +3,12 @@ import { createFileRoute, Link } from "@tanstack/react-router";
 import { smsService } from "@workspace/api-client";
 import { Button } from "@workspace/ui/components/button";
 import { format } from "date-fns";
+import { Plus, Send } from "lucide-react";
 import { useState } from "react";
 import { DataTable } from "@/components/data-table";
 import { SearchFilter } from "@/components/search-filter";
 import { StatusBadge } from "@/components/status-badge";
+import { TestSendDialog } from "./-components/test-send-dialog";
 
 export const Route = createFileRoute("/_auth/sms/campaigns/")({
   component: SmsCampaignsPage,
@@ -19,6 +21,7 @@ function progress(done: number, total: number): string {
 
 function SmsCampaignsPage() {
   const [statusFilter, setStatusFilter] = useState<string>("");
+  const [isTestSendOpen, setIsTestSendOpen] = useState(false);
 
   const { data } = useQuery({
     queryKey: ["sms-campaigns", { status: statusFilter }],
@@ -78,6 +81,18 @@ function SmsCampaignsPage() {
     <div className="flex-1 space-y-4 p-8 pt-6">
       <div className="flex items-center justify-between">
         <h2 className="text-3xl font-bold tracking-tight">SMS Campaigns</h2>
+        <div className="flex items-center gap-2">
+          <Button variant="outline" onClick={() => setIsTestSendOpen(true)}>
+            <Send className="h-4 w-4" />
+            Test Send
+          </Button>
+          <Button asChild>
+            <Link to="/sms/campaigns/create">
+              <Plus className="h-4 w-4" />
+              Create Campaign
+            </Link>
+          </Button>
+        </div>
       </div>
 
       <SearchFilter
@@ -95,6 +110,8 @@ function SmsCampaignsPage() {
       />
 
       <DataTable columns={columns} data={data?.data || []} />
+
+      <TestSendDialog open={isTestSendOpen} onOpenChange={setIsTestSendOpen} />
     </div>
   );
 }

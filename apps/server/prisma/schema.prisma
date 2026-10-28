@@ -81,7 +81,7 @@ model SmsTemplate {
   updatedAt  DateTime   @updatedAt
   name       String
   content    String
-  layaScore  Float?
+  spamScore   Float?
   isApproved Boolean    @default(false)
   userId     Int
   campaigns  Campaign[]
@@ -99,6 +99,8 @@ model Campaign {
   status        CampaignStatus @default(DRAFT)
   templateId    Int
   csvMediaId    Int?
+  csvUrl        String?
+  csvText       String?
   userId        Int
   totalRows     Int            @default(0)
   processedRows Int            @default(0)

@@ -43,13 +43,13 @@ Creates a new SMS template. The backend AI (System 2 mock) will enhance the cont
 
 ### B. Evaluate Template (Compliance / Anti-Spam)
 **Endpoint:** `POST /api/sms/templates/:id/evaluate`
-Runs the template through System 1 (Laya mock) to check for spam/compliance before it can be used in a campaign.
+Runs the template through System 1 (Cloudflare CLEF) to check for spam/compliance before it can be used in a campaign.
 
 **Response:**
 ```json
 {
   "id": 1,
-  "layaScore": 0.1,
+  "spamScore": 0.1,
   "isApproved": true
 }
 ```
@@ -78,6 +78,12 @@ Instead of uploading massive CSVs directly to the NestJS server, you upload them
 ### D. Create & Enqueue Campaign
 **Endpoint:** `POST /api/sms/campaigns`
 Initiates the SMS broadcast. It downloads the uploaded CSV, parses it, interpolates the template variables (e.g., `{name}`), and enqueues jobs into BullMQ.
+
+The audience can be supplied two ways — pick one:
+- `csvUrl` — a reachable URL for the CSV (S3 or any public host).
+- `csvText` — the raw CSV content, sent inline (useful when no bucket is configured).
+
+When the CSV is readable the campaign is queued immediately. When it is not, the campaign is still created as `DRAFT` and can be sent later from the admin panel.
 
 **Request:**
 ```json

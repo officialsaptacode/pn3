@@ -39,7 +39,7 @@ async function main() {
       name: "Overdue Payment Notice",
       content:
         "Dear {name}, your payment of Rs. {amount} was due on {due_date}. Pay via eSewa to avoid penalty.",
-      layaScore: 0.1,
+      spamScore: 0.1,
       isApproved: true,
       userId: manager.id,
     },
@@ -51,7 +51,7 @@ async function main() {
     create: {
       name: "Festival Loan Offer",
       content: "WINNER! Claim your FREE festival loan discount now!!! Limited time!!!",
-      layaScore: 0.92,
+      spamScore: 0.92,
       isApproved: false,
       userId: manager.id,
     },

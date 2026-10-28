@@ -42,7 +42,7 @@ const STEPS: { id: Phase; no: string; title: string; hint: string }[] = [
     id: "compliance",
     no: "02",
     title: "Compliance check",
-    hint: "Laya scores spam before you send",
+    hint: "CLEF scores spam before you send",
   },
   {
     id: "audience",
@@ -83,7 +83,7 @@ export default function SmsCampaignPage() {
   );
   const [templateId, setTemplateId] = useState<number | null>(null);
   const [savedContent, setSavedContent] = useState("");
-  const [layaScore, setLayaScore] = useState<number | null>(null);
+  const [spamScore, setSpamScore] = useState<number | null>(null);
   const [isApproved, setIsApproved] = useState(false);
   const [csv, setCsv] = useState<ParsedCsv | null>(null);
   const [csvFileName, setCsvFileName] = useState("");
@@ -167,13 +167,13 @@ export default function SmsCampaignPage() {
       setTemplateId(t.id);
       setSavedContent(t.content);
       setIsApproved(false);
-      setLayaScore(null);
+      setSpamScore(null);
       store.upsertTemplate({
         id: t.id,
         name: t.name,
         content: t.content,
         isApproved: false,
-        layaScore: null,
+        spamScore: null,
         at: Date.now(),
       });
     } catch (e) {
@@ -188,14 +188,14 @@ export default function SmsCampaignPage() {
     setError(null);
     try {
       const r = await smsApi.evaluateTemplate(templateId);
-      setLayaScore(r.layaScore);
+      setSpamScore(r.spamScore);
       setIsApproved(r.isApproved);
       store.upsertTemplate({
         id: templateId,
         name: tplName.trim(),
         content: savedContent,
         isApproved: r.isApproved,
-        layaScore: r.layaScore,
+        spamScore: r.spamScore,
         at: Date.now(),
       });
     } catch (e) {
@@ -522,7 +522,7 @@ export default function SmsCampaignPage() {
                       </p>
                       {!templateId ? (
                         <p className="text-sm text-ink-500">
-                          Save a template first — Laya needs wording to score.
+                          Save a template first — CLEF needs wording to score.
                         </p>
                       ) : (
                         <div className="flex flex-wrap items-center gap-4">
@@ -536,9 +536,9 @@ export default function SmsCampaignPage() {
                             ) : (
                               <ShieldCheck className="h-4 w-4" aria-hidden />
                             )}
-                            Evaluate with Laya
+                            Evaluate with CLEF
                           </button>
-                          {layaScore != null && (
+                          {spamScore != null && (
                             <span
                               className={cn(
                                 "stamp rounded px-3 py-1 font-mono text-sm font-extrabold uppercase tracking-widest",
@@ -546,13 +546,13 @@ export default function SmsCampaignPage() {
                               )}
                             >
                               {isApproved
-                                ? `✓ Approved · ${layaScore.toFixed(2)}`
-                                : `✕ Blocked · ${layaScore.toFixed(2)}`}
+                                ? `✓ Approved · ${spamScore.toFixed(2)}`
+                                : `✕ Blocked · ${spamScore.toFixed(2)}`}
                             </span>
                           )}
                         </div>
                       )}
-                      {layaScore != null && !isApproved && (
+                      {spamScore != null && !isApproved && (
                         <p className="mt-3 text-sm text-stamp-600">
                           Blocked as spam/compliance risk. Edit the wording and re-save — a new
                           template id restarts the check.
@@ -721,9 +721,9 @@ export default function SmsCampaignPage() {
                 Compliance ledger
               </p>
               <div aria-live="polite">
-                {layaScore == null ? (
+                {spamScore == null ? (
                   <p className="text-sm text-ink-500">
-                    Not yet evaluated. Laya returns a spam score — under 0.5 approves.
+                    Not yet evaluated. CLEF returns a spam score — under 0.5 approves.
                   </p>
                 ) : (
                   <div className="flex items-center gap-3">
@@ -736,7 +736,7 @@ export default function SmsCampaignPage() {
                       {isApproved ? "Approved" : "Blocked"}
                     </span>
                     <span className="font-mono text-sm text-ink-700">
-                      score {layaScore.toFixed(2)}
+                      score {spamScore.toFixed(2)}
                     </span>
                   </div>
                 )}

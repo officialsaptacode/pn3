@@ -10,7 +10,7 @@ Based on the original `design-sms-wrapper.md` and our engineering review, here i
 
 ## Core Flow
 1. **Template Drafting:** Manager uses Next.js UI to draft an SMS template. System 2 (LLM) assists in generating a polite, 160-character template.
-2. **Compliance Check:** System 1 (`convaiinnovations/laya`) evaluates the template for spam/compliance.
+2. **Compliance Check:** System 1 (Cloudflare CLEF) evaluates the template for spam/compliance.
 3. **Execution Setup:** Manager uploads the CSV via Presigned URL. NestJS reads the file from storage.
 4. **Queueing (BullMQ):** 
    - **Job Granularity:** We will use chunked jobs (e.g., 100 SMS per job) or 1 job per SMS to guarantee exactly-once delivery and prevent duplicate sends in case of partial API failures.

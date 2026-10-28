@@ -7,7 +7,7 @@ export interface StoredTemplate {
   name: string;
   content: string;
   isApproved: boolean;
-  layaScore: number | null;
+  spamScore: number | null;
   sample?: boolean;
   at: number;
 }
@@ -46,7 +46,7 @@ const STARTERS: StoredTemplate[] = [
     content:
       "Dear {name}, your payment of Rs. {amount} was due on {due_date}. Pay via eSewa to avoid penalty.",
     isApproved: true,
-    layaScore: 0.1,
+    spamScore: 0.1,
     sample: true,
     at: 0,
   },
@@ -56,7 +56,7 @@ const STARTERS: StoredTemplate[] = [
     content:
       "Namaste {name}, reminder: Rs. {amount} is due {due_date}. Visit your branch or pay online. Dhanyabad!",
     isApproved: false,
-    layaScore: null,
+    spamScore: null,
     sample: true,
     at: 0,
   },

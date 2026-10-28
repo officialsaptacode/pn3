@@ -3,13 +3,13 @@ export interface SmsTemplate {
   name: string;
   content: string;
   isApproved: boolean;
-  layaScore?: number | null;
+  spamScore?: number | null;
   userId?: number;
 }
 
 export interface EvaluateResult {
   id: number;
-  layaScore: number;
+  spamScore: number;
   isApproved: boolean;
 }
 

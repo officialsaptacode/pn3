@@ -1,7 +1,9 @@
 import { useQuery } from "@tanstack/react-query";
-import { createFileRoute } from "@tanstack/react-router";
+import { createFileRoute, Link } from "@tanstack/react-router";
 import { smsService } from "@workspace/api-client";
+import { Button } from "@workspace/ui/components/button";
 import { format } from "date-fns";
+import { Plus } from "lucide-react";
 import { useState } from "react";
 import { DataTable } from "@/components/data-table";
 import { SearchFilter } from "@/components/search-filter";
@@ -42,10 +44,10 @@ function SmsTemplatesPage() {
       ),
     },
     {
-      accessorKey: "layaScore",
-      header: "Laya",
+      accessorKey: "spamScore",
+      header: "Spam score",
       cell: ({ row }: any) =>
-        row.original.layaScore == null ? "—" : Number(row.original.layaScore).toFixed(2),
+        row.original.spamScore == null ? "—" : Number(row.original.spamScore).toFixed(2),
     },
     {
       accessorKey: "user.email",
@@ -67,7 +69,7 @@ function SmsTemplatesPage() {
       id: "approval",
       header: "Approval",
       cell: ({ row }: any) => (
-        <StatusBadge status={approvalLabel(row.original.isApproved, row.original.layaScore)} />
+        <StatusBadge status={approvalLabel(row.original.isApproved, row.original.spamScore)} />
       ),
     },
     {
@@ -81,6 +83,12 @@ function SmsTemplatesPage() {
     <div className="flex-1 space-y-4 p-8 pt-6">
       <div className="flex items-center justify-between">
         <h2 className="text-3xl font-bold tracking-tight">SMS Templates</h2>
+        <Button asChild>
+          <Link to="/sms/templates/create">
+            <Plus className="h-4 w-4" />
+            Create Template
+          </Link>
+        </Button>
       </div>
 
       <SearchFilter

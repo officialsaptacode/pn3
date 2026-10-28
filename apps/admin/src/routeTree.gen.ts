@@ -37,6 +37,8 @@ import { Route as AuthAuthorsCreateRouteImport } from './routes/_auth/authors/cr
 import { Route as AuthSmsTemplatesIndexRouteImport } from './routes/_auth/sms/templates/index'
 import { Route as AuthSmsCampaignsIndexRouteImport } from './routes/_auth/sms/campaigns/index'
 import { Route as AuthTagsEditIdRouteImport } from './routes/_auth/tags/edit/$id'
+import { Route as AuthSmsTemplatesCreateRouteImport } from './routes/_auth/sms/templates/create'
+import { Route as AuthSmsCampaignsCreateRouteImport } from './routes/_auth/sms/campaigns/create'
 import { Route as AuthSmsCampaignsIdRouteImport } from './routes/_auth/sms/campaigns/$id'
 import { Route as AuthDestinationsEditIdRouteImport } from './routes/_auth/destinations/edit/$id'
 import { Route as AuthDeparturesEditIdRouteImport } from './routes/_auth/departures/edit/$id'
@@ -182,6 +184,16 @@ const AuthTagsEditIdRoute = AuthTagsEditIdRouteImport.update({
   path: '/tags/edit/$id',
   getParentRoute: () => AuthRoute,
 } as any)
+const AuthSmsTemplatesCreateRoute = AuthSmsTemplatesCreateRouteImport.update({
+  id: '/sms/templates/create',
+  path: '/sms/templates/create',
+  getParentRoute: () => AuthRoute,
+} as any)
+const AuthSmsCampaignsCreateRoute = AuthSmsCampaignsCreateRouteImport.update({
+  id: '/sms/campaigns/create',
+  path: '/sms/campaigns/create',
+  getParentRoute: () => AuthRoute,
+} as any)
 const AuthSmsCampaignsIdRoute = AuthSmsCampaignsIdRouteImport.update({
   id: '/sms/campaigns/$id',
   path: '/sms/campaigns/$id',
@@ -238,6 +250,8 @@ export interface FileRoutesByFullPath {
   '/departures/edit/$id': typeof AuthDeparturesEditIdRoute
   '/destinations/edit/$id': typeof AuthDestinationsEditIdRoute
   '/sms/campaigns/$id': typeof AuthSmsCampaignsIdRoute
+  '/sms/campaigns/create': typeof AuthSmsCampaignsCreateRoute
+  '/sms/templates/create': typeof AuthSmsTemplatesCreateRoute
   '/tags/edit/$id': typeof AuthTagsEditIdRoute
   '/sms/campaigns/': typeof AuthSmsCampaignsIndexRoute
   '/sms/templates/': typeof AuthSmsTemplatesIndexRoute
@@ -272,6 +286,8 @@ export interface FileRoutesByTo {
   '/departures/edit/$id': typeof AuthDeparturesEditIdRoute
   '/destinations/edit/$id': typeof AuthDestinationsEditIdRoute
   '/sms/campaigns/$id': typeof AuthSmsCampaignsIdRoute
+  '/sms/campaigns/create': typeof AuthSmsCampaignsCreateRoute
+  '/sms/templates/create': typeof AuthSmsTemplatesCreateRoute
   '/tags/edit/$id': typeof AuthTagsEditIdRoute
   '/sms/campaigns': typeof AuthSmsCampaignsIndexRoute
   '/sms/templates': typeof AuthSmsTemplatesIndexRoute
@@ -308,6 +324,8 @@ export interface FileRoutesById {
   '/_auth/departures/edit/$id': typeof AuthDeparturesEditIdRoute
   '/_auth/destinations/edit/$id': typeof AuthDestinationsEditIdRoute
   '/_auth/sms/campaigns/$id': typeof AuthSmsCampaignsIdRoute
+  '/_auth/sms/campaigns/create': typeof AuthSmsCampaignsCreateRoute
+  '/_auth/sms/templates/create': typeof AuthSmsTemplatesCreateRoute
   '/_auth/tags/edit/$id': typeof AuthTagsEditIdRoute
   '/_auth/sms/campaigns/': typeof AuthSmsCampaignsIndexRoute
   '/_auth/sms/templates/': typeof AuthSmsTemplatesIndexRoute
@@ -344,6 +362,8 @@ export interface FileRouteTypes {
     | '/departures/edit/$id'
     | '/destinations/edit/$id'
     | '/sms/campaigns/$id'
+    | '/sms/campaigns/create'
+    | '/sms/templates/create'
     | '/tags/edit/$id'
     | '/sms/campaigns/'
     | '/sms/templates/'
@@ -378,6 +398,8 @@ export interface FileRouteTypes {
     | '/departures/edit/$id'
     | '/destinations/edit/$id'
     | '/sms/campaigns/$id'
+    | '/sms/campaigns/create'
+    | '/sms/templates/create'
     | '/tags/edit/$id'
     | '/sms/campaigns'
     | '/sms/templates'
@@ -413,6 +435,8 @@ export interface FileRouteTypes {
     | '/_auth/departures/edit/$id'
     | '/_auth/destinations/edit/$id'
     | '/_auth/sms/campaigns/$id'
+    | '/_auth/sms/campaigns/create'
+    | '/_auth/sms/templates/create'
     | '/_auth/tags/edit/$id'
     | '/_auth/sms/campaigns/'
     | '/_auth/sms/templates/'
@@ -622,6 +646,20 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthTagsEditIdRouteImport
       parentRoute: typeof AuthRoute
     }
+    '/_auth/sms/templates/create': {
+      id: '/_auth/sms/templates/create'
+      path: '/sms/templates/create'
+      fullPath: '/sms/templates/create'
+      preLoaderRoute: typeof AuthSmsTemplatesCreateRouteImport
+      parentRoute: typeof AuthRoute
+    }
+    '/_auth/sms/campaigns/create': {
+      id: '/_auth/sms/campaigns/create'
+      path: '/sms/campaigns/create'
+      fullPath: '/sms/campaigns/create'
+      preLoaderRoute: typeof AuthSmsCampaignsCreateRouteImport
+      parentRoute: typeof AuthRoute
+    }
     '/_auth/sms/campaigns/$id': {
       id: '/_auth/sms/campaigns/$id'
       path: '/sms/campaigns/$id'
@@ -688,6 +726,8 @@ interface AuthRouteChildren {
   AuthDeparturesEditIdRoute: typeof AuthDeparturesEditIdRoute
   AuthDestinationsEditIdRoute: typeof AuthDestinationsEditIdRoute
   AuthSmsCampaignsIdRoute: typeof AuthSmsCampaignsIdRoute
+  AuthSmsCampaignsCreateRoute: typeof AuthSmsCampaignsCreateRoute
+  AuthSmsTemplatesCreateRoute: typeof AuthSmsTemplatesCreateRoute
   AuthTagsEditIdRoute: typeof AuthTagsEditIdRoute
   AuthSmsCampaignsIndexRoute: typeof AuthSmsCampaignsIndexRoute
   AuthSmsTemplatesIndexRoute: typeof AuthSmsTemplatesIndexRoute
@@ -721,6 +761,8 @@ const AuthRouteChildren: AuthRouteChildren = {
   AuthDeparturesEditIdRoute: AuthDeparturesEditIdRoute,
   AuthDestinationsEditIdRoute: AuthDestinationsEditIdRoute,
   AuthSmsCampaignsIdRoute: AuthSmsCampaignsIdRoute,
+  AuthSmsCampaignsCreateRoute: AuthSmsCampaignsCreateRoute,
+  AuthSmsTemplatesCreateRoute: AuthSmsTemplatesCreateRoute,
   AuthTagsEditIdRoute: AuthTagsEditIdRoute,
   AuthSmsCampaignsIndexRoute: AuthSmsCampaignsIndexRoute,
   AuthSmsTemplatesIndexRoute: AuthSmsTemplatesIndexRoute,

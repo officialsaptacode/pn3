@@ -555,7 +555,7 @@ export interface SmsTemplateItem {
   id: number;
   name: string;
   content: string;
-  layaScore: number | null;
+  spamScore: number | null;
   isApproved: boolean;
   createdAt: string;
   user: SmsTemplateUser;
@@ -569,13 +569,24 @@ export interface SmsTemplateRecord {
   updatedAt: string;
   name: string;
   content: string;
-  layaScore: number | null;
+  spamScore: number | null;
   isApproved: boolean;
   userId: number;
 }
 
 export interface SmsTemplateUpdateResult extends SmsTemplateRecord {
   complianceInvalidated: boolean;
+}
+
+// Result of the temporary test-send endpoint (spam check + delivery).
+export interface SmsTestSendResult {
+  success: boolean;
+  blocked: boolean;
+  score: number | null;
+  isSpam: boolean;
+  providerMessageId?: string;
+  message: string;
+  error?: string;
 }
 
 export interface SmsCampaignItem {

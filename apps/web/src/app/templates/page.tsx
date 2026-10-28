@@ -110,7 +110,7 @@ export default function TemplatesPage() {
                       t.isApproved ? "text-teal-600" : "text-stamp-600",
                     )}
                   >
-                    {t.isApproved ? "Approved" : t.layaScore == null ? "Unchecked" : "Blocked"}
+                    {t.isApproved ? "Approved" : t.spamScore == null ? "Unchecked" : "Blocked"}
                   </span>
                 </div>
                 <p className="mt-2 font-mono text-sm leading-relaxed text-ink-700">{t.content}</p>
@@ -122,8 +122,8 @@ export default function TemplatesPage() {
                         className="mr-1 rounded bg-teal-50 px-1 font-mono text-teal-700"
                       >{`{${v}}`}</code>
                     ))}
-                    {t.layaScore != null && (
-                      <span className="ml-1 font-mono">score {t.layaScore.toFixed(2)}</span>
+                    {t.spamScore != null && (
+                      <span className="ml-1 font-mono">score {t.spamScore.toFixed(2)}</span>
                     )}
                   </p>
                   <div className="flex gap-2">

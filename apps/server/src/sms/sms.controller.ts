@@ -20,8 +20,10 @@ import {
   TemplateListQueryDto,
 } from "./dto/sms-query.dto";
 import { AdvancedAnalyticsQueryDto } from "./dtos/advanced-analytics.dto";
+import { ClefSpamCheckDto } from "./dtos/clef-spam.dto";
 import { CreateCampaignDto } from "./dtos/create-campaign.dto";
 import { ScheduleCampaignDto } from "./dtos/schedule-campaign.dto";
+import { TestSendSmsDto } from "./dtos/test-send-sms.dto";
 import { UpdateTemplateDto } from "./dtos/update-template.dto";
 import { SmsService } from "./sms.service";
 
@@ -52,6 +54,22 @@ export class SmsController {
     return this.smsService.evaluateTemplate(id);
   }
 
+  @UseGuards(RolesGuard)
+  @Roles(Role.ADMIN)
+  @Post("test/clef/spam-check")
+  @HttpCode(HttpStatus.OK)
+  async testClefSpamCheck(@Body() body: ClefSpamCheckDto) {
+    return this.smsService.testClefSpamDetection(body.text);
+  }
+
+  @UseGuards(RolesGuard)
+  @Roles(Role.ADMIN)
+  @Post("test/send")
+  @HttpCode(HttpStatus.OK)
+  async testSend(@Body() body: TestSendSmsDto) {
+    return this.smsService.testSendSms(body.phoneNumber, body.message);
+  }
+
   @Post("campaigns")
   async createCampaign(@GetCurrentUserId() userId: number, @Body() body: CreateCampaignDto) {
     return this.smsService.createCampaign(
@@ -59,6 +77,7 @@ export class SmsController {
       body.name,
       body.templateId,
       body.csvUrl,
+      body.csvText,
       body.sendAt,
     );
   }
